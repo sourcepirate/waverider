@@ -9,7 +9,7 @@ django-ninja>=1.0,<2.0
 # Celery and related packages
 celery>=5.3,<6.0
 redis>=5.0,<6.0 # Python client for Redis (used by Celery)
-django-celery-beat>=2.5,<2.6 # Database-backed periodic task scheduler
+django-celery-beat>=2.7,<3.0 # Database-backed periodic task scheduler
 django-celery-results>=2.5,<2.6 # Celery result backend using Django ORM
 
 # Database driver (PostgreSQL)
