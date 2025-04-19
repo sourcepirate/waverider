@@ -134,10 +134,8 @@ def main():
                 print("Successfully created initial commit.")
             else:
                 print("--- Failed to create initial commit. Please commit manually. ---")
-                steps_succeeded = False
         else:
             print("--- Failed to stage files. Please stage and commit manually. ---")
-            steps_succeeded = False
 
     print("\n----------------------")
     if steps_succeeded:
