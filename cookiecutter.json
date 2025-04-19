@@ -5,7 +5,7 @@
     "author_name": "Your Name",
     "author_email": "your@email.com",
     "github_username": "YourGitHubUsername",
-    "django_secret_key": "{{ 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'|random_ascii_string(50) }}",
+    "django_secret_key": "!!! DONT FORGET TO REPLACE THIS !!!_!! DO NOT USE IN PRODUCTION !!",
     "use_docker": "y",
     "postgresql_user": "postgres",
     "postgresql_password": "password",
