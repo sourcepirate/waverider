@@ -42,6 +42,8 @@ jobs:
           # Map TCP port 6379 on service container to the runner host
           - 6379:6379
 
+    # --- START JINJA RAW BLOCK ---
+    {% raw %}
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -76,9 +78,21 @@ jobs:
         cd "{{ cookiecutter.project_slug }}" # Navigate into the generated project directory
         pytest # Run pytest
 
+    - name: Install Safety for Security Check
+      run: |
+        pip install safety
+
+    - name: Check for Vulnerable Dependencies
+      run: |
+        # Check base dependencies (most critical for runtime)
+        # You could also check local.txt or production.txt if preferred
+        safety check -r "{{ cookiecutter.project_slug }}/requirements/base.txt" --full-report
+
     # Optional: Add steps for linting (e.g., flake8, black) here
     # - name: Lint with Flake8
     #   run: |
     #     pip install flake8
     #     flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-    #     flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics 
+    #     flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    # --- END JINJA RAW BLOCK ---
+    {% endraw %} 
