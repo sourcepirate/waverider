@@ -1,0 +1,10 @@
+# Requirements for production environment
+# Includes base requirements plus production-specific tools
+
+-r base.txt
+
+# Simplified static file serving for production
+whitenoise[brotli]>=6.6,<7.0 # Includes brotli compression support
+
+# Add any other production-specific dependencies here
+# e.g., monitoring agents, specific logging libraries 

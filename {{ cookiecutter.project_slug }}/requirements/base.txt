@@ -1,0 +1,33 @@
+# Base requirements for {{ cookiecutter.project_name }}
+
+# Django framework
+django>=5.0,<6.0 # Use Django 5.x
+
+# API Framework
+django-ninja>=1.0,<2.0
+
+# Celery and related packages
+celery>=5.3,<6.0
+redis>=5.0,<6.0 # Python client for Redis (used by Celery)
+django-celery-beat>=2.5,<2.6 # Database-backed periodic task scheduler
+django-celery-results>=2.5,<2.6 # Celery result backend using Django ORM
+
+# Database driver (PostgreSQL)
+psycopg2-binary>=2.9,<3.0 # Use binary for easier installation
+
+# Cache backend (Redis)
+django-redis>=5.4,<6.0
+
+# JWT Authentication
+djangorestframework-simplejwt>=5.3,<6.0
+
+# Object-level Permissions
+django-guardian>=2.4,<2.5
+
+# Environment variable management
+python-decouple>=3.8,<4.0
+# Optional: For parsing DATABASE_URL format easily
+# dj-database-url>=2.1,<2.2
+
+# WSGI server for production
+gunicorn>=21.2,<22.0 

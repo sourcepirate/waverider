@@ -1,0 +1,16 @@
+{
+    "project_name": "My Awesome Project",
+    "project_slug": "{{ cookiecutter.project_name.lower().replace(' ', '_').replace('-', '_') }}",
+    "project_description": "A short description of the project.",
+    "author_name": "Your Name",
+    "author_email": "your@email.com",
+    "github_username": "YourGitHubUsername",
+    "django_secret_key": "{{ 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'|random_ascii_string(50) }}",
+    "use_docker": "y",
+    "postgresql_user": "postgres",
+    "postgresql_password": "password",
+    "postgresql_db": "{{ cookiecutter.project_slug }}",
+    "postgresql_port": "5432",
+    "celery_broker_url": "redis://redis:6379/0",
+    "celery_result_backend": "redis://redis:6379/1"
+}

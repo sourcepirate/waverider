@@ -1,0 +1,15 @@
+# Requirements for local development
+# Includes base requirements plus development tools
+
+-r base.txt
+
+# Useful Django extensions (runserver_plus, shell_plus, etc.)
+django-extensions>=3.2,<4.0
+# For debugging in the browser
+django-debug-toolbar>=4.2,<5.0
+# Werkzeug might be needed by runserver_plus or debug toolbar in some cases
+Werkzeug>=3.0,<4.0
+
+# Testing libraries
+pytest>=7.0,<8.0
+pytest-django>=4.7,<5.0 

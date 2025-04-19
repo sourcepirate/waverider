@@ -1,0 +1,138 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:15-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER={{ cookiecutter.postgresql_user }}
+      - POSTGRES_PASSWORD={{ cookiecutter.postgresql_password }}
+      - POSTGRES_DB={{ cookiecutter.postgresql_db }}
+    ports:
+      # Make DB accessible from host machine if needed (e.g., for DB GUI)
+      # Be cautious exposing DB ports in production environments
+      - "{{ cookiecutter.postgresql_port }}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U {{ cookiecutter.postgresql_user }} -d {{ cookiecutter.postgresql_db }}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    ports:
+      # Make Redis accessible from host machine if needed
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # target: development # Use this to target the development stage if defined
+    # Command for development (overrides Dockerfile CMD)
+    # Use runserver_plus if django-extensions is installed for auto-reloading
+    # command: python manage.py runserver_plus 0.0.0.0:8000
+    # Fallback to standard runserver
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      # Mount current directory into container for code changes reflection
+      - .:/app
+      # Named volume for static files (can be shared with nginx later if needed)
+      - static_volume:/app/staticfiles
+      # Named volume for media files
+      - media_volume:/app/mediafiles
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_SETTINGS_MODULE={{ cookiecutter.project_slug }}.settings.local
+      - DJANGO_SECRET_KEY={{ cookiecutter.django_secret_key }} # Can be overridden by .env
+      - POSTGRES_DB={{ cookiecutter.postgresql_db }}
+      - POSTGRES_USER={{ cookiecutter.postgresql_user }}
+      - POSTGRES_PASSWORD={{ cookiecutter.postgresql_password }}
+      - POSTGRES_HOST=db # Service name of the postgres container
+      - POSTGRES_PORT=5432 # Internal port within docker network
+      - CELERY_BROKER_URL={{ cookiecutter.celery_broker_url }} # e.g., redis://redis:6379/0
+      - CELERY_RESULT_BACKEND={{ cookiecutter.celery_result_backend }} # e.g., redis://redis:6379/1
+      - CACHE_URL=redis://redis:6379/2 # Added cache URL pointing to redis service DB 2
+      # Add other necessary env vars for local settings
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    # Use .env file for sensitive variables or local overrides
+    env_file:
+      - .env # Make sure to create this file
+
+  celeryworker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: celery -A {{ cookiecutter.project_slug }}.celery worker --loglevel=info
+    volumes:
+      - .:/app
+    environment:
+      - DJANGO_SETTINGS_MODULE={{ cookiecutter.project_slug }}.settings.local
+      - DJANGO_SECRET_KEY={{ cookiecutter.django_secret_key }}
+      - POSTGRES_DB={{ cookiecutter.postgresql_db }}
+      - POSTGRES_USER={{ cookiecutter.postgresql_user }}
+      - POSTGRES_PASSWORD={{ cookiecutter.postgresql_password }}
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - CELERY_BROKER_URL={{ cookiecutter.celery_broker_url }}
+      - CELERY_RESULT_BACKEND={{ cookiecutter.celery_result_backend }}
+      - CACHE_URL=redis://redis:6379/2 # Added cache URL
+    depends_on:
+      web: # Wait for web to be ready for potential initial setup/migrations
+        condition: service_started # Or customize if web has a healthcheck
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+
+  celerybeat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # Ensure the beat database file is stored in a persistent volume if not using DatabaseScheduler
+    # command: celery -A {{ cookiecutter.project_slug }}.celery beat --loglevel=info --pidfile=/tmp/celerybeat.pid -s /tmp/celerybeat-schedule
+    # Command using DatabaseScheduler (recommended with django-celery-beat)
+    command: celery -A {{ cookiecutter.project_slug }}.celery beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - .:/app
+    environment:
+      - DJANGO_SETTINGS_MODULE={{ cookiecutter.project_slug }}.settings.local
+      - DJANGO_SECRET_KEY={{ cookiecutter.django_secret_key }}
+      - POSTGRES_DB={{ cookiecutter.postgresql_db }}
+      - POSTGRES_USER={{ cookiecutter.postgresql_user }}
+      - POSTGRES_PASSWORD={{ cookiecutter.postgresql_password }}
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - CELERY_BROKER_URL={{ cookiecutter.celery_broker_url }}
+      - CELERY_RESULT_BACKEND={{ cookiecutter.celery_result_backend }}
+      - CACHE_URL=redis://redis:6379/2 # Added cache URL
+    depends_on:
+      web: # Wait for web to be ready for potential initial setup/migrations
+        condition: service_started # Or customize if web has a healthcheck
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+
+volumes:
+  postgres_data:
+  redis_data:
+  static_volume:
+  media_volume: 
