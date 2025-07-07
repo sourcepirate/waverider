@@ -27,4 +27,4 @@ class UserSchema(Schema):
     last_name: Optional[str] = None
 
 class ErrorSchema(Schema):
-    detail: str 
+    detail: str
