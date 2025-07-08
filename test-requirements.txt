@@ -1,0 +1,5 @@
+# Test dependencies for cookiecutter template
+pytest>=7.0.0
+cookiecutter>=2.1.0
+pytest-cov>=4.0.0
+pytest-mock>=3.10.0
