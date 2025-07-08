@@ -1,5 +1,8 @@
 # Makefile for Django OAuth2 Cookiecutter Template
 
+# Detect Python executable
+PYTHON := $(shell command -v python3 2> /dev/null || command -v python 2> /dev/null || echo "python")
+
 .PHONY: help test test-basic test-generation test-full install-deps clean
 
 help:
@@ -10,22 +13,27 @@ help:
 	@echo "  make test-full   - Run full test suite with pytest"
 	@echo "  make install     - Install test dependencies"
 	@echo "  make clean       - Clean up test artifacts"
+	@echo "  make check-py    - Check Python executable"
+
+check-py:
+	@echo "Using Python: $(PYTHON)"
+	@$(PYTHON) --version
 
 install:
 	@echo "Installing test dependencies..."
-	pip install -r test-requirements.txt
+	$(PYTHON) -m pip install -r test-requirements.txt
 
 test-basic:
 	@echo "Running basic template validation..."
-	python validate_template.py
+	$(PYTHON) validate_template.py
 
 test-gen:
 	@echo "Testing cookiecutter generation..."
-	python -c "import tempfile, shutil, os; from cookiecutter.main import cookiecutter; temp_dir = tempfile.mkdtemp(); cookiecutter('.', no_input=True, output_dir=temp_dir); print('✓ Generation successful'); shutil.rmtree(temp_dir)"
+	$(PYTHON) -c "import tempfile, shutil, os; from cookiecutter.main import cookiecutter; temp_dir = tempfile.mkdtemp(); cookiecutter('.', no_input=True, output_dir=temp_dir); print('✓ Generation successful'); shutil.rmtree(temp_dir)"
 
 test-full:
 	@echo "Running full test suite..."
-	python run_tests.py
+	$(PYTHON) run_tests.py
 
 test: test-basic test-gen test-full
 	@echo "All tests completed!"
@@ -39,12 +47,12 @@ clean:
 
 # Development shortcuts
 dev-install:
-	pip install -r test-requirements.txt
-	pip install pre-commit
+	$(PYTHON) -m pip install -r test-requirements.txt
+	$(PYTHON) -m pip install pre-commit
 	pre-commit install
 
 dev-test:
-	python validate_template.py
+	$(PYTHON) validate_template.py
 	@echo "Quick validation completed!"
 
 # Generate a test project for manual testing

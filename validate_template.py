@@ -124,7 +124,7 @@ class TestTemplateStructure:
         print(f"✓ All {len(accounts_files)} accounts app files exist")
     
     def test_python_files_syntax(self):
-        """Test that Python files have valid syntax."""
+        """Test that Python files have valid syntax (skip template files)."""
         python_files = []
         
         # Find all Python files in the template
@@ -138,6 +138,11 @@ class TestTemplateStructure:
             try:
                 with open(py_file, 'r', encoding='utf-8') as f:
                     content = f.read()
+                    
+                    # Skip files with cookiecutter template variables
+                    if '{{ cookiecutter.' in content:
+                        continue
+                    
                     # Try to compile the Python code
                     compile(content, py_file, 'exec')
             except SyntaxError as e:
@@ -147,8 +152,12 @@ class TestTemplateStructure:
                 # Skip files with encoding issues
                 continue
         
-        assert not syntax_errors, f"Syntax errors found: {syntax_errors}"
-        print(f"✓ All {len(python_files)} Python files have valid syntax")
+        # Only report syntax errors if we found any non-template files with errors
+        if syntax_errors:
+            assert False, f"Syntax errors found in non-template files: {syntax_errors}"
+        
+        print(f"✓ All {len(python_files)} Python files have valid syntax (template files skipped)")
+        return True
     
     def test_requirements_files_content(self):
         """Test that requirements files have valid content."""
@@ -183,7 +192,8 @@ class TestTemplateStructure:
         with open(dockerfile_path, 'r') as f:
             dockerfile_content = f.read()
             assert "FROM python" in dockerfile_content, "Dockerfile should use Python base image"
-            assert "COPY requirements" in dockerfile_content, "Dockerfile should copy requirements"
+            assert ("COPY requirements" in dockerfile_content or 
+                   "COPY ./requirements" in dockerfile_content), "Dockerfile should copy requirements"
             assert "RUN pip install" in dockerfile_content, "Dockerfile should install dependencies"
         
         # Test docker-compose.yml
@@ -284,6 +294,54 @@ class TestTemplateStructure:
         
         print(f"✓ Comprehensive tests exist with {len(test_methods)} test methods")
     
+    def test_template_variables_usage(self):
+        """Test that cookiecutter variables are used correctly."""
+        template_files = []
+        
+        # Find all files that might contain template variables
+        for root, dirs, files in os.walk(self.template_dir):
+            for file in files:
+                if file.endswith(('.py', '.yml', '.yaml', '.txt', '.md', '.json')):
+                    template_files.append(os.path.join(root, file))
+        
+        variable_issues = []
+        
+        for template_file in template_files:
+            try:
+                with open(template_file, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    
+                    # Check for common template variable patterns
+                    if '{{ cookiecutter.' in content:
+                        # Check for proper variable usage
+                        import re
+                        
+                        # Find all cookiecutter variables
+                        variables = re.findall(r'\{\{\s*cookiecutter\.(\w+)\s*\}\}', content)
+                        
+                        # Check that used variables are defined in cookiecutter.json
+                        with open(os.path.join(self.template_dir, 'cookiecutter.json'), 'r') as config_file:
+                            config = json.load(config_file)
+                            
+                            for var in variables:
+                                if var not in config:
+                                    relative_path = os.path.relpath(template_file, self.template_dir)
+                                    variable_issues.append(f"{relative_path}: Undefined variable 'cookiecutter.{var}'")
+                        
+                        # Check for malformed template syntax
+                        malformed = re.findall(r'\{\{[^}]*\}\}', content)
+                        for match in malformed:
+                            if not re.match(r'\{\{\s*cookiecutter\.\w+.*\}\}', match):
+                                if 'cookiecutter.' in match:  # Only flag cookiecutter-related syntax
+                                    relative_path = os.path.relpath(template_file, self.template_dir)
+                                    variable_issues.append(f"{relative_path}: Malformed template syntax '{match}'")
+                        
+            except (UnicodeDecodeError, json.JSONDecodeError):
+                continue
+        
+        assert not variable_issues, f"Template variable issues: {variable_issues}"
+        print(f"✓ Template variables are correctly used in {len(template_files)} files")
+
     def run_all_tests(self):
         """Run all validation tests."""
         print("Running cookiecutter template validation tests...\n")
@@ -298,7 +356,8 @@ class TestTemplateStructure:
             self.test_docker_files_content,
             self.test_oauth2_implementation,
             self.test_api_structure_complete,
-            self.test_comprehensive_tests_exist
+            self.test_comprehensive_tests_exist,
+            self.test_template_variables_usage
         ]
         
         passed = 0

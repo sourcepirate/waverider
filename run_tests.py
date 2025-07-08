@@ -13,13 +13,32 @@ import json
 from pathlib import Path
 
 
+def get_python_executable():
+    """Get the best available Python executable."""
+    python_candidates = ['python3', 'python', 'python3.11', 'python3.10', 'python3.9']
+    
+    for candidate in python_candidates:
+        try:
+            result = subprocess.run([candidate, '--version'], 
+                                  capture_output=True, text=True, timeout=5)
+            if result.returncode == 0:
+                return candidate
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            continue
+    
+    # Fallback to sys.executable if nothing else works
+    return sys.executable
+
+
 def run_basic_validation():
     """Run basic template validation."""
     print("Running basic template validation...")
     
+    python_exe = get_python_executable()
+    
     # Run the validation script
     result = subprocess.run([
-        sys.executable, 
+        python_exe, 
         os.path.join(os.path.dirname(__file__), "validate_template.py")
     ], capture_output=True, text=True)
     
@@ -123,12 +142,14 @@ def run_pytest_tests():
         
         print("Running pytest tests...")
         
+        python_exe = get_python_executable()
+        
         # Run pytest on the test file
         test_file = os.path.join(os.path.dirname(__file__), "test_cookiecutter.py")
         
         if os.path.exists(test_file):
             result = subprocess.run([
-                sys.executable, "-m", "pytest", test_file, "-v"
+                python_exe, "-m", "pytest", test_file, "-v"
             ], capture_output=True, text=True)
             
             if result.returncode == 0:
