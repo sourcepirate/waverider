@@ -6,7 +6,6 @@ import sys
 
 def main():
     """Run administrative tasks."""
-    # Default to local settings if DJANGO_SETTINGS_MODULE is not set
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', '{{ cookiecutter.project_slug }}.settings.local')
     try:
         from django.core.management import execute_from_command_line
@@ -20,4 +19,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main() 
+    main()

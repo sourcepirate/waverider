@@ -18,43 +18,31 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from ninja import NinjaAPI
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
     TokenVerifyView,
 )
 
-# Import the accounts API router
-from {{ cookiecutter.project_slug }}.accounts.api import router as auth_router
+# Import the accounts API
+from ninja import NinjaAPI
+from {{ cookiecutter.project_slug }}.accounts.api import router as accounts_router
 
-# Initialize Django Ninja API
-# You can customize options like versioning, docs_url, etc. here
-# See: https://django-ninja.rest-framework.com/tutorial/first-steps/
+# Create the main API instance
 api = NinjaAPI(
     title="{{ cookiecutter.project_name }} API",
     version="1.0.0",
-    description="{{ cookiecutter.project_description }}",
-    # csrf=True # Enable CSRF protection if needed (requires session auth)
+    description="Complete API for {{ cookiecutter.project_name }} with authentication and OAuth2 support"
 )
 
-# Example Ninja endpoint (can be moved to app-specific files later)
-@api.get("/hello")
-def hello(request):
-    return {"message": "Hello from Django Ninja!"}
-
-# Mount the authentication router
-api.add_router("/auth/", auth_router, tags=["Authentication"])
-
-# You can add other app routers here
-# from otherapp.api import router as other_router
-# api.add_router("/other/", other_router, tags=["Other App"])
+# Add accounts router with proper prefix
+api.add_router("/accounts", accounts_router)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', api.urls, name='api'), # Give the main API mount point a name
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'), # SimpleJWT refresh URL (name is conventional)
-    path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),     # SimpleJWT verify URL (name is conventional)
+    path('api/', api.urls, name='api'), # Main API mount point with all endpoints
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'), # SimpleJWT refresh URL
+    path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),     # SimpleJWT verify URL
 ]
 
 # Serve static and media files during development

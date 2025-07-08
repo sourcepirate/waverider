@@ -1,14 +1,24 @@
+"""
+Authentication API
+
+This module contains authentication-related endpoints including:
+- User registration
+- User login
+- JWT token management
+"""
+
 from ninja import Router
-from django.contrib.auth import authenticate, login as django_login # Avoid name collision
+from django.contrib.auth import authenticate, login as django_login
 from django.contrib.auth.models import User
 from django.db import IntegrityError
 from rest_framework_simplejwt.tokens import RefreshToken
 from datetime import timedelta
 
-from .schemas import UserRegisterSchema, UserLoginSchema, TokenResponseSchema, UserSchema, ErrorSchema
+from {{ cookiecutter.project_slug }}.accounts.schemas import UserRegisterSchema, UserLoginSchema, TokenResponseSchema, UserSchema, ErrorSchema
 
-# Initialize the router
+# Initialize the authentication router
 router = Router()
+
 
 @router.post(
     "/register",
@@ -64,4 +74,4 @@ def login(request, payload: UserLoginSchema):
     else:
         return 401, {"detail": "Invalid username or password."}
 
-# Note: Token refresh and verification are handled by simplejwt's provided views (added in urls.py) 
+# Note: Token refresh and verification are handled by simplejwt's provided views (added in urls.py)

@@ -52,6 +52,8 @@ THIRD_PARTY_APPS = [
     'rest_framework_simplejwt', # JWT Authentication
     'guardian',                 # Object-level Permissions
     'django_redis',             # Redis Cache Backend (needed if using it directly, not just via settings)
+    'oauth2_provider',          # OAuth2 Provider (django-oauth-toolkit)
+    'social_django',            # Social Authentication (social-auth-app-django)
 ]
 
 LOCAL_APPS = [
@@ -225,3 +227,38 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5), # Not used unless SLIDING tokens enabled
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1), # Not used unless SLIDING tokens enabled
 }
+
+
+# OAuth2 Settings
+# Configure these in your environment-specific settings (local.py, production.py)
+GOOGLE_OAUTH2_CLIENT_ID = ""
+GOOGLE_OAUTH2_CLIENT_SECRET = ""
+
+GITHUB_OAUTH2_CLIENT_ID = ""
+GITHUB_OAUTH2_CLIENT_SECRET = ""
+
+FACEBOOK_OAUTH2_CLIENT_ID = ""
+FACEBOOK_OAUTH2_CLIENT_SECRET = ""
+
+# Social Auth Settings (for social-auth-app-django)
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = GOOGLE_OAUTH2_CLIENT_ID
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = GOOGLE_OAUTH2_CLIENT_SECRET
+
+SOCIAL_AUTH_GITHUB_KEY = GITHUB_OAUTH2_CLIENT_ID
+SOCIAL_AUTH_GITHUB_SECRET = GITHUB_OAUTH2_CLIENT_SECRET
+
+SOCIAL_AUTH_FACEBOOK_KEY = FACEBOOK_OAUTH2_CLIENT_ID
+SOCIAL_AUTH_FACEBOOK_SECRET = FACEBOOK_OAUTH2_CLIENT_SECRET
+
+# Social Auth Pipeline (optional customization)
+SOCIAL_AUTH_PIPELINE = (
+    'social_core.pipeline.social_auth.social_details',
+    'social_core.pipeline.social_auth.social_uid',
+    'social_core.pipeline.social_auth.auth_allowed',
+    'social_core.pipeline.social_auth.social_user',
+    'social_core.pipeline.user.get_username',
+    'social_core.pipeline.user.create_user',
+    'social_core.pipeline.social_auth.associate_user',
+    'social_core.pipeline.social_auth.load_extra_data',
+    'social_core.pipeline.user.user_details',
+)

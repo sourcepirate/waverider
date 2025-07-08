@@ -6,10 +6,15 @@
 # Useful Django extensions (runserver_plus, shell_plus, etc.)
 django-extensions>=3.2,<4.0
 # For debugging in the browser
-django-debug-toolbar>=4.2,<5.0
+django-debug-toolbar>=4.4,<5.0
 # Werkzeug might be needed by runserver_plus or debug toolbar in some cases
 Werkzeug>=3.0,<4.0
 
 # Testing libraries
-pytest>=7.0,<8.0
-pytest-django>=4.7,<5.0 
+pytest>=8.3,<9.0
+pytest-django>=4.9,<5.0
+
+# Code formatting and linting
+black>=24.0,<25.0
+isort>=5.13,<6.0
+flake8>=7.1,<8.0 
