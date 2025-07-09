@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """
 Test runner for the cookiecutter template.
 
@@ -15,7 +15,7 @@ from pathlib import Path
 
 def get_python_executable():
     """Get the best available Python executable."""
-    python_candidates = ['python3', 'python', 'python3.11', 'python3.10', 'python3.9']
+    python_candidates = ['python']
     
     for candidate in python_candidates:
         try:

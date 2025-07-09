@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """
 Quick Template Validation
 
@@ -41,7 +41,6 @@ def main():
         "{{ cookiecutter.project_slug }}/requirements/base.txt",
         "{{ cookiecutter.project_slug }}/{{ cookiecutter.project_slug }}/settings/base.py",
         "{{ cookiecutter.project_slug }}/{{ cookiecutter.project_slug }}/accounts/__init__.py",
-        "{{ cookiecutter.project_slug }}/{{ cookiecutter.project_slug }}/accounts/api.py",
         "{{ cookiecutter.project_slug }}/{{ cookiecutter.project_slug }}/accounts/api/__init__.py",
         "{{ cookiecutter.project_slug }}/{{ cookiecutter.project_slug }}/accounts/oauth2/__init__.py",
         "{{ cookiecutter.project_slug }}/{{ cookiecutter.project_slug }}/accounts/tests/test_api_package.py"

@@ -1,7 +1,7 @@
 # Makefile for Django OAuth2 Cookiecutter Template
 
 # Detect Python executable
-PYTHON := $(shell command -v python3 2> /dev/null || command -v python 2> /dev/null || echo "python")
+PYTHON := $(shell command -v python 2> /dev/null || command -v python3 2> /dev/null || echo "python")
 
 .PHONY: help test test-basic test-generation test-full install-deps clean
 
