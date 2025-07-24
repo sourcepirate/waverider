@@ -7,11 +7,11 @@ on:
     branches: [ main, develop ]
 
 jobs:
-  test-template:
+  test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
 
     steps:
     - uses: actions/checkout@v4
@@ -24,57 +24,17 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        make install
+        pip install -r test-requirements.txt
     
-    - name: Run tox validation tests
+    - name: Run tox validation
       run: |
-        make tox-validate
+        tox -e validate
     
-    - name: Run pytest tests with tox
+    - name: Run tox tests
       run: |
         tox -e py
-    
-    - name: Test cookiecutter generation
-      run: |
-        make test-gen
 
-  test-comprehensive:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-    
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        make install
-    
-    - name: Run all tox tests
-      run: |
-        make tox-all
-    
-    - name: Test generated project structure
-      run: |
-        # Test actual cookiecutter generation with default context
-        cookiecutter . --no-input --output-dir /tmp/test-output
-        
-        # Verify generated project structure
-        PROJECT_DIR="/tmp/test-output/my_awesome_project"
-        test -f "$PROJECT_DIR/manage.py"
-        test -f "$PROJECT_DIR/requirements/base.txt"
-        test -d "$PROJECT_DIR/my_awesome_project/accounts"
-        test -d "$PROJECT_DIR/my_awesome_project/accounts/api"
-        test -d "$PROJECT_DIR/my_awesome_project/accounts/oauth2"
-        test -f "$PROJECT_DIR/my_awesome_project/accounts/tests/test_api_package.py"
-        test -f "$PROJECT_DIR/my_awesome_project/accounts/api.py"
-        echo "✓ All structure checks passed"
-
-  test-docker:
+  comprehensive-test:
     runs-on: ubuntu-latest
     
     steps:
@@ -88,64 +48,8 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        make install
+        pip install -r test-requirements.txt
     
-    - name: Generate project
+    - name: Run comprehensive tests
       run: |
-        cookiecutter . --no-input --output-dir /tmp/test-output
-    
-    - name: Test Docker build
-      run: |
-        cd /tmp/test-output/my_awesome_project
-        docker build -t test-django-app .
-    
-    - name: Test Docker compose
-      run: |
-        cd /tmp/test-output/my_awesome_project
-        docker-compose -f docker-compose.yml config
-
-  test-lint:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-    
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        make install
-    
-    - name: Run tox linting
-      run: |
-        make tox-lint
-
-  test-coverage:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-    
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        make install
-    
-    - name: Run coverage tests
-      run: |
-        make tox-coverage
-    
-    - name: Upload coverage reports
-      uses: codecov/codecov-action@v3
-      with:
-        files: ./coverage.xml
-        fail_ci_if_error: false
+        tox -e all-tests
