@@ -231,6 +231,7 @@ SIMPLE_JWT = {
 
 # OAuth2 Settings
 # Configure these in your environment-specific settings (local.py, production.py)
+
 GOOGLE_OAUTH2_CLIENT_ID = os.getenv("GOOGLE_OAUTH2_CLIENT_ID", None)
 GOOGLE_OAUTH2_CLIENT_SECRET = os.getenv("GOOGLE_OAUTH2_CLIENT_SECRET", None)
 
