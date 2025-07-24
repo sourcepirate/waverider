@@ -17,40 +17,44 @@ from pathlib import Path
 # Add the cookiecutter directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+
+@pytest.fixture
+def temp_dir():
+    """Create a temporary directory for testing."""
+    temp_dir = tempfile.mkdtemp()
+    yield temp_dir
+    shutil.rmtree(temp_dir)
+
+
+@pytest.fixture
+def template_dir():
+    """Get the template directory path."""
+    return os.path.dirname(os.path.abspath(__file__))
+
+
+@pytest.fixture
+def test_context():
+    """Provide test context for cookiecutter generation."""
+    return {
+        "project_name": "Test Django Project",
+        "project_slug": "test_django_project", 
+        "project_description": "A test Django project with OAuth2 support",
+        "author_name": "Test Author",
+        "author_email": "test@example.com",
+        "github_username": "testuser",
+        "django_secret_key": "test-secret-key-for-testing-only",
+        "use_docker": "y",
+        "postgresql_user": "test_user",
+        "postgresql_password": "test_password",
+        "postgresql_db": "test_db",
+        "postgresql_port": "5432",
+        "celery_broker_url": "redis://localhost:6379/0",
+        "celery_result_backend": "redis://localhost:6379/1"
+    }
+
+
 class TestCookiecutterTemplate:
     """Test the cookiecutter template generation and structure."""
-    
-    @pytest.fixture
-    def temp_dir(self):
-        """Create a temporary directory for testing."""
-        temp_dir = tempfile.mkdtemp()
-        yield temp_dir
-        shutil.rmtree(temp_dir)
-    
-    @pytest.fixture
-    def template_dir(self):
-        """Get the template directory path."""
-        return os.path.dirname(os.path.abspath(__file__))
-    
-    @pytest.fixture
-    def test_context(self):
-        """Provide test context for cookiecutter generation."""
-        return {
-            "project_name": "Test Django Project",
-            "project_slug": "test_django_project",
-            "project_description": "A test Django project with OAuth2 support",
-            "author_name": "Test Author",
-            "author_email": "test@example.com",
-            "github_username": "testuser",
-            "django_secret_key": "test-secret-key-for-testing-only",
-            "use_docker": "y",
-            "postgresql_user": "test_user",
-            "postgresql_password": "test_password",
-            "postgresql_db": "test_db",
-            "postgresql_port": "5432",
-            "celery_broker_url": "redis://localhost:6379/0",
-            "celery_result_backend": "redis://localhost:6379/1"
-        }
     
     def test_cookiecutter_json_structure(self, template_dir):
         """Test that cookiecutter.json has the correct structure."""
@@ -270,7 +274,7 @@ class TestCookiecutterTemplate:
         with open(dockerfile_path, 'r') as f:
             dockerfile_content = f.read()
             assert "FROM python" in dockerfile_content, "Dockerfile should use Python base image"
-            assert "COPY requirements" in dockerfile_content, "Dockerfile should copy requirements"
+            assert "COPY ./requirements" in dockerfile_content, "Dockerfile should copy requirements"
         
         # Check docker-compose content
         with open(compose_path, 'r') as f:
@@ -326,7 +330,7 @@ class TestCookiecutterGeneration:
                 full_path = os.path.join(generated_project, file_path)
                 assert os.path.exists(full_path), f"Generated file missing: {file_path}"
             
-            return generated_project
+            # Test passed - project generated successfully
             
         except Exception as e:
             pytest.fail(f"Cookiecutter generation failed: {e}")

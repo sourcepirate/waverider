@@ -3,7 +3,7 @@
 # Detect Python executable
 PYTHON := $(shell command -v python 2> /dev/null || command -v python3 2> /dev/null || echo "python")
 
-.PHONY: help test test-basic test-generation test-full install-deps clean
+.PHONY: help test test-basic test-generation test-full install-deps clean tox-test tox-validate tox-all
 
 help:
 	@echo "Available commands:"
@@ -14,6 +14,9 @@ help:
 	@echo "  make install     - Install test dependencies"
 	@echo "  make clean       - Clean up test artifacts"
 	@echo "  make check-py    - Check Python executable"
+	@echo "  make tox-test    - Run tests using tox"
+	@echo "  make tox-validate- Run validation using tox"
+	@echo "  make tox-all     - Run all tox environments"
 
 check-py:
 	@echo "Using Python: $(PYTHON)"
@@ -60,3 +63,28 @@ generate-test-project:
 	@echo "Generating test project..."
 	cookiecutter . --output-dir /tmp/test-projects
 	@echo "Test project generated in /tmp/test-projects/"
+
+# Tox targets
+tox-test:
+	@echo "Running tox tests..."
+	tox -e py
+
+tox-validate:
+	@echo "Running tox validation..."
+	tox -e validate,quick-test,template-test
+
+tox-all:
+	@echo "Running all tox environments..."
+	tox -e all-tests
+
+tox-lint:
+	@echo "Running tox linting..."
+	tox -e lint
+
+tox-format:
+	@echo "Running tox formatting..."
+	tox -e format
+
+tox-coverage:
+	@echo "Running tox with coverage..."
+	tox -e coverage

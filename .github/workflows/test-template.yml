@@ -11,83 +11,84 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.8, 3.9, "3.10", "3.11"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
     
-    - name: Install test dependencies
+    - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r test-requirements.txt
+        make install
     
-    - name: Run basic template validation
+    - name: Run tox validation tests
       run: |
-        python validate_template.py
+        make tox-validate
     
-    - name: Run full test suite
+    - name: Run pytest tests with tox
       run: |
-        python run_tests.py
+        tox -e py
     
     - name: Test cookiecutter generation
       run: |
-        # Test actual cookiecutter generation
+        make test-gen
+
+  test-comprehensive:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        make install
+    
+    - name: Run all tox tests
+      run: |
+        make tox-all
+    
+    - name: Test generated project structure
+      run: |
+        # Test actual cookiecutter generation with default context
         cookiecutter . --no-input --output-dir /tmp/test-output
         
         # Verify generated project structure
-        test -f /tmp/test-output/my_awesome_project/manage.py
-        test -f /tmp/test-output/my_awesome_project/requirements/base.txt
-        test -d /tmp/test-output/my_awesome_project/my_awesome_project/accounts
-        test -d /tmp/test-output/my_awesome_project/my_awesome_project/accounts/api
-        test -d /tmp/test-output/my_awesome_project/my_awesome_project/accounts/oauth2
-        test -f /tmp/test-output/my_awesome_project/my_awesome_project/accounts/tests/test_api_package.py
-    
-    - name: Test generated project dependencies
-      run: |
-        cd /tmp/test-output/my_awesome_project
-        python -m pip install -r requirements/base.txt
-        python -m pip install -r requirements/local.txt
-        
-        # Test that Python files can be imported (basic syntax check)
-        python -c "import my_awesome_project.settings.base"
-        python -c "import my_awesome_project.accounts.api"
-        python -c "import my_awesome_project.accounts.oauth2"
-    
-    - name: Run generated project tests
-      run: |
-        cd /tmp/test-output/my_awesome_project
-        # Install Django and other dependencies
-        python -m pip install -r requirements/local.txt
-        
-        # Set up environment
-        export DJANGO_SETTINGS_MODULE=my_awesome_project.settings.local
-        export SECRET_KEY=test-secret-key-for-ci
-        
-        # Run Django checks
-        python manage.py check --deploy
-        
-        # Run tests
-        python manage.py test accounts.tests.test_api_package --verbosity=2
+        PROJECT_DIR="/tmp/test-output/my_awesome_project"
+        test -f "$PROJECT_DIR/manage.py"
+        test -f "$PROJECT_DIR/requirements/base.txt"
+        test -d "$PROJECT_DIR/my_awesome_project/accounts"
+        test -d "$PROJECT_DIR/my_awesome_project/accounts/api"
+        test -d "$PROJECT_DIR/my_awesome_project/accounts/oauth2"
+        test -f "$PROJECT_DIR/my_awesome_project/accounts/tests/test_api_package.py"
+        test -f "$PROJECT_DIR/my_awesome_project/accounts/api.py"
+        echo "✓ All structure checks passed"
 
   test-docker:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
     
-    - name: Install cookiecutter
+    - name: Install dependencies
       run: |
-        pip install cookiecutter
+        python -m pip install --upgrade pip
+        make install
     
     - name: Generate project
       run: |
@@ -103,32 +104,48 @@ jobs:
         cd /tmp/test-output/my_awesome_project
         docker-compose -f docker-compose.yml config
 
-  test-multiple-contexts:
+  test-lint:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
     
-    - name: Install cookiecutter
+    - name: Install dependencies
       run: |
-        pip install cookiecutter
+        python -m pip install --upgrade pip
+        make install
     
-    - name: Test different project configurations
+    - name: Run tox linting
       run: |
-        # Test with Docker disabled
-        cookiecutter . --no-input --output-dir /tmp/test-no-docker \
-          use_docker=n project_name="No Docker Project" project_slug="no_docker_project"
-        
-        # Test with different database settings
-        cookiecutter . --no-input --output-dir /tmp/test-custom-db \
-          project_name="Custom DB Project" project_slug="custom_db_project" \
-          postgresql_user="customuser" postgresql_db="customdb"
-        
-        # Verify both projects were generated
-        test -f /tmp/test-no-docker/no_docker_project/manage.py
-        test -f /tmp/test-custom-db/custom_db_project/manage.py
+        make tox-lint
+
+  test-coverage:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        make install
+    
+    - name: Run coverage tests
+      run: |
+        make tox-coverage
+    
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        files: ./coverage.xml
+        fail_ci_if_error: false
