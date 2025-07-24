@@ -36,7 +36,7 @@ test-gen:
 
 test-full:
 	@echo "Running full test suite..."
-	$(PYTHON) run_tests.py
+	$(PYTHON) tests/run_tests.py
 
 test: test-basic test-gen test-full
 	@echo "All tests completed!"

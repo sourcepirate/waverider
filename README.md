@@ -94,10 +94,10 @@ make tox-all       # Run all tox environments
 
 ```bash
 # Individual test scripts
-python validate_template.py    # Comprehensive validation
-python quick_test.py          # Quick validation
-python run_tests.py           # Full test suite
-python -m pytest test_cookiecutter.py -v  # Pytest tests
+python validate_template.py          # Comprehensive validation
+python tests/quick_test.py           # Quick validation
+python tests/run_tests.py            # Full test suite
+python -m pytest tests/test_cookiecutter.py -v  # Pytest tests
 ```
 
 ### Available Tox Environments

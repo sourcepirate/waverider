@@ -29,7 +29,7 @@ def temp_dir():
 @pytest.fixture
 def template_dir():
     """Get the template directory path."""
-    return os.path.dirname(os.path.abspath(__file__))
+    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 @pytest.fixture
