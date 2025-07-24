@@ -39,7 +39,7 @@ def run_basic_validation():
     # Run the validation script
     result = subprocess.run([
         python_exe, 
-        os.path.join(os.path.dirname(__file__), "validate_template.py")
+        os.path.join(os.path.dirname(os.path.dirname(__file__)), "validate_template.py")
     ], capture_output=True, text=True)
     
     if result.returncode == 0:

@@ -17,7 +17,7 @@ def main():
     print("Django OAuth2 Cookiecutter Template - Quick Validation")
     print("=" * 60)
     
-    template_dir = os.path.dirname(os.path.abspath(__file__))
+    template_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     errors = []
     
     # Test 1: Check cookiecutter.json exists and is valid
