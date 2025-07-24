@@ -597,21 +597,7 @@ class APIIntegrationTestCase(TestCase):
         else:
             self.skipTest("Registration endpoint not working in test environment")
 
-    def test_user_login_invalid_credentials(self):
-        """Test user login with invalid credentials."""
-        login_data = {
-            'username': 'nonexistent',
-            'password': 'wrongpassword'
-        }
-        
-        response = self.client.post(
-            f'{self.base_url}/login',
-            data=json.dumps(login_data),
-            content_type='application/json'
-        )
-        self.assertEqual(response.status_code, 401)
-        data = response.json()
-        self.assertIn('Invalid username or password', data['detail'])
+# Removed duplicate test_user_login_invalid_credentials method to avoid redundancy.
 
 
 class APIPackageIntegrationTestCase(TestCase):
