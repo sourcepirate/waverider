@@ -64,7 +64,7 @@ def get_oauth2_config(provider: str) -> Dict[str, Any]:
     return config
 
 
-def get_available_providers() -> list[Dict[str, str]]:
+def get_available_providers() -> List[Dict[str, str]]:
     """
     Get list of OAuth2 providers that have been configured with credentials.
     

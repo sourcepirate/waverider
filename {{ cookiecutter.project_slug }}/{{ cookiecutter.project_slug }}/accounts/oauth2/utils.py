@@ -75,7 +75,7 @@ def get_user_info(provider: str, access_token: str) -> Dict[str, Any]:
     return response.json()
 
 
-def normalize_user_data(provider: str, user_info: Dict[str, Any], access_token: str = None) -> Dict[str, Any]:
+def normalize_user_data(provider: str, user_info: Dict[str, Any], access_token: Optional[str] = None) -> Dict[str, Any]:
     """
     Normalize user data from different OAuth2 providers to a common format.
     
