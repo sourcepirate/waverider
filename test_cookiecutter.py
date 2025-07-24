@@ -136,7 +136,6 @@ class TestCookiecutterTemplate:
             "admin.py",
             "apps.py", 
             "schemas.py",
-            "api.py",
             "api/__init__.py",
             "api/auth.py",
             "api/oauth2.py",
