@@ -1,6 +1,6 @@
 # Test dependencies for cookiecutter template
-pytest>=7.0.0
-cookiecutter>=2.1.0
-pytest-cov>=4.0.0
-pytest-mock>=3.10.0
-tox>=4.0.0
+pytest>=8.4.0
+cookiecutter>=2.6.0
+pytest-cov>=6.3.0
+pytest-mock>=3.15.0
+tox>=4.30.0
