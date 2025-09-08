@@ -1,5 +1,5 @@
 # Start from a Python base image
-FROM python:3.11-slim-bullseye as base
+FROM python:3.12-slim-bullseye as base
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -13,12 +13,12 @@ WORKDIR /app
 # Add gettext for internationalization support if needed
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-       # Required for psycopg2 non-binary builds (keep if switching from -binary)
-       # build-essential libpq-dev \
-       # Optional: For PostgreSQL client tools (psql)
-       postgresql-client \
-       # Optional: For internationalization
-       # gettext \
+    # Required for psycopg2 non-binary builds (keep if switching from -binary)
+    # build-essential libpq-dev \
+    # Optional: For PostgreSQL client tools (psql)
+    postgresql-client \
+    # Optional: For internationalization
+    # gettext \
     && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
     && rm -rf /var/lib/apt/lists/*
 
