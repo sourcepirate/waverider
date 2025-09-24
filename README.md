@@ -1,5 +1,10 @@
 # Cookiecutter Django Celery Ninja
 
+[![Build Status](https://github.com/sourcepirate/waverider/workflows/Test%20Cookiecutter%20Template/badge.svg)](https://github.com/sourcepirate/waverider/actions)
+[![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://python.org)
+[![License](https://img.shields.io/github/license/sourcepirate/waverider.svg)](https://github.com/sourcepirate/waverider/blob/main/LICENSE)
+[![Cookiecutter](https://img.shields.io/badge/cookiecutter-template-green.svg)](https://github.com/cookiecutter/cookiecutter)
+
 A Cookiecutter template for creating Django projects with Celery, Celery Beat, Django Ninja for APIs, and Docker support.
 
 ## Features
