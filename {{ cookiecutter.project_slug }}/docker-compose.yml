@@ -1,4 +1,4 @@
-version: '3.9'
+version: "3.9"
 
 services:
   db:
@@ -14,7 +14,11 @@ services:
       # Be cautious exposing DB ports in production environments
       - "{{ cookiecutter.postgresql_port }}:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U {{ cookiecutter.postgresql_user }} -d {{ cookiecutter.postgresql_db }}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U {{ cookiecutter.postgresql_user }} -d {{ cookiecutter.postgresql_db }}",
+        ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -42,13 +46,6 @@ services:
     # command: python manage.py runserver_plus 0.0.0.0:8000
     # Fallback to standard runserver
     command: python manage.py runserver 0.0.0.0:8000
-    volumes:
-      # Mount current directory into container for code changes reflection
-      - .:/app
-      # Named volume for static files (can be shared with nginx later if needed)
-      - static_volume:/app/staticfiles
-      # Named volume for media files
-      - media_volume:/app/mediafiles
     ports:
       - "8000:8000"
     environment:
@@ -77,8 +74,6 @@ services:
       context: .
       dockerfile: Dockerfile
     command: celery -A {{ cookiecutter.project_slug }}.celery worker --loglevel=info
-    volumes:
-      - .:/app
     environment:
       - DJANGO_SETTINGS_MODULE={{ cookiecutter.project_slug }}.settings.local
       - DJANGO_SECRET_KEY={{ cookiecutter.django_secret_key }}
@@ -108,8 +103,6 @@ services:
     # command: celery -A {{ cookiecutter.project_slug }}.celery beat --loglevel=info --pidfile=/tmp/celerybeat.pid -s /tmp/celerybeat-schedule
     # Command using DatabaseScheduler (recommended with django-celery-beat)
     command: celery -A {{ cookiecutter.project_slug }}.celery beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
-    volumes:
-      - .:/app
     environment:
       - DJANGO_SETTINGS_MODULE={{ cookiecutter.project_slug }}.settings.local
       - DJANGO_SECRET_KEY={{ cookiecutter.django_secret_key }}
@@ -135,4 +128,4 @@ volumes:
   postgres_data:
   redis_data:
   static_volume:
-  media_volume: 
+  media_volume:
