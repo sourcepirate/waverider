@@ -46,6 +46,10 @@ services:
     # command: python manage.py runserver_plus 0.0.0.0:8000
     # Fallback to standard runserver
     command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
     ports:
       - "8000:8000"
     environment:
@@ -74,6 +78,10 @@ services:
       context: .
       dockerfile: Dockerfile
     command: celery -A {{ cookiecutter.project_slug }}.celery worker --loglevel=info
+    volumes:
+      - ./:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
     environment:
       - DJANGO_SETTINGS_MODULE={{ cookiecutter.project_slug }}.settings.local
       - DJANGO_SECRET_KEY={{ cookiecutter.django_secret_key }}
@@ -114,6 +122,10 @@ services:
       - CELERY_BROKER_URL={{ cookiecutter.celery_broker_url }}
       - CELERY_RESULT_BACKEND={{ cookiecutter.celery_result_backend }}
       - CACHE_URL=redis://redis:6379/2 # Added cache URL
+    volumes:
+      - ./:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
     depends_on:
       web: # Wait for web to be ready for potential initial setup/migrations
         condition: service_started # Or customize if web has a healthcheck
