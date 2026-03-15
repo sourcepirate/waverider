@@ -11,4 +11,4 @@ from django.contrib.auth.models import User
 # @admin.register(User)
 # class UserAdmin(BaseUserAdmin):
 #     # Add customizations here
-#     pass 
+#     pass

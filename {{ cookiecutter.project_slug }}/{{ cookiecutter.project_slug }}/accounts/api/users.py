@@ -7,14 +7,13 @@ This module contains user profile management endpoints including:
 - User management operations
 """
 
-from ninja import Router
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
+from ninja import Router
 from ninja.security import HttpBearer
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
-from django.contrib.auth import get_user_model
-
-from {{ cookiecutter.project_slug }}.accounts.schemas import UserSchema, ErrorSchema
+from {{cookiecutter.project_slug}}.accounts.schemas import ErrorSchema, UserSchema
 
 # Initialize the users router
 router = Router()
@@ -46,7 +45,7 @@ def get_current_user(request):
     """
     if not request.auth:
         return 401, {"detail": "Authentication required."}
-    
+
     return 200, request.auth
 
 
@@ -63,9 +62,9 @@ def update_current_user(request, payload: dict):
     """
     if not request.auth:
         return 401, {"detail": "Authentication required."}
-    
+
     user = request.auth
-    
+
     # Update allowed fields
     if 'first_name' in payload:
         user.first_name = payload['first_name']
@@ -76,7 +75,7 @@ def update_current_user(request, payload: dict):
         if User.objects.filter(email=payload['email']).exclude(id=user.id).exists():
             return 400, {"detail": "Email address is already in use."}
         user.email = payload['email']
-    
+
     try:
         user.save()
         return 200, user
@@ -97,7 +96,7 @@ def delete_current_user(request):
     """
     if not request.auth:
         return 401, {"detail": "Authentication required."}
-    
+
     user = request.auth
     user.delete()
     return 204, None

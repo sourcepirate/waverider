@@ -5,8 +5,10 @@ This module contains utility functions for OAuth2 token exchange,
 user information retrieval, and data normalization.
 """
 
-import requests
 from typing import Any, Dict, List, Optional
+
+import requests
+
 from .providers import get_oauth2_config
 
 

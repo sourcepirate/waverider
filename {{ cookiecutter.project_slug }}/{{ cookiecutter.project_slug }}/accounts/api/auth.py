@@ -7,14 +7,21 @@ This module contains authentication-related endpoints including:
 - JWT token management
 """
 
-from ninja import Router
-from django.contrib.auth import authenticate, login as django_login
-from django.contrib.auth.models import User
-from django.db import IntegrityError
-from rest_framework_simplejwt.tokens import RefreshToken
 from datetime import timedelta
 
-from {{ cookiecutter.project_slug }}.accounts.schemas import UserRegisterSchema, UserLoginSchema, TokenResponseSchema, UserSchema, ErrorSchema
+from django.contrib.auth import authenticate
+from django.contrib.auth import login as django_login
+from django.contrib.auth.models import User
+from django.db import IntegrityError
+from ninja import Router
+from rest_framework_simplejwt.tokens import RefreshToken
+from {{cookiecutter.project_slug}}.accounts.schemas import (
+    ErrorSchema,
+    TokenResponseSchema,
+    UserLoginSchema,
+    UserRegisterSchema,
+    UserSchema,
+)
 
 # Initialize the authentication router
 router = Router()

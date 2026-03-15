@@ -1,4 +1,5 @@
 import os
+
 from celery import Celery
 from django.conf import settings
 
@@ -6,16 +7,18 @@ from django.conf import settings
 # This must happen before configuring the Celery app instance.
 # We check which settings file to use based on an environment variable.
 # Default to 'local' if not specified.
-settings_module = os.environ.setdefault('DJANGO_SETTINGS_MODULE', '{{ cookiecutter.project_slug }}.settings.local')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', settings_module)
+settings_module = os.environ.setdefault(
+    "DJANGO_SETTINGS_MODULE", "{{ cookiecutter.project_slug }}.settings.local"
+)
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", settings_module)
 
-app = Celery('{{ cookiecutter.project_slug }}')
+app = Celery("{{ cookiecutter.project_slug }}")
 
 # Using a string here means the worker doesn't have to serialize
 # the configuration object to child processes.
 # - namespace='CELERY' means all celery-related configuration keys
 #   should have a `CELERY_` prefix.
-app.config_from_object('django.conf:settings', namespace='CELERY')
+app.config_from_object("django.conf:settings", namespace="CELERY")
 
 # Load task modules from all registered Django app configs.
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
@@ -24,7 +27,8 @@ app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 @app.task(bind=True, ignore_result=True)
 def debug_task(self):
     """A sample task for debugging purposes."""
-    print(f'Request: {self.request!r}')
+    print(f"Request: {self.request!r}")
+
 
 # Optional: Add periodic tasks using Celery Beat schedule
 # from celery.schedules import crontab
@@ -41,4 +45,4 @@ def debug_task(self):
 #     },
 # }
 # Remember to configure the beat scheduler in settings (already done in base.py)
-# CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler' 
+# CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'

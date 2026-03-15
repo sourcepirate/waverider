@@ -1,5 +1,5 @@
 # Start from a Python base image
-FROM python:3.12-slim-bullseye as base
+FROM python:3.13-slim-bookworm as base
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -59,4 +59,4 @@ EXPOSE 8000
 # Run gunicorn
 # The specific command might be overridden in docker-compose.yml
 # Use --bind 0.0.0.0 to allow connections from outside the container
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "{{ cookiecutter.project_slug }}.wsgi:application"] 
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "{{ cookiecutter.project_slug }}.wsgi:application"]

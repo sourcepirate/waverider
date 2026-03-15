@@ -5,9 +5,9 @@ This module contains configuration for different OAuth2 providers including
 their endpoints, scopes, and settings keys.
 """
 
-from django.conf import settings
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
+from django.conf import settings
 
 # OAuth2 Provider Configuration
 OAUTH2_PROVIDERS = {

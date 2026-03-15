@@ -48,4 +48,4 @@ repos:
 #     hooks:
 #       - id: bandit
 #         args: ["-c", "pyproject.toml"] # Requires bandit config in pyproject.toml
-#         exclude: tests/ # Exclude test directories if needed 
+#         exclude: tests/ # Exclude test directories if needed

@@ -3,11 +3,11 @@
 
 -r base.txt
 
-# Simplified static file serving for production
-whitenoise[brotli]>=6.11.0,<7.0 # Includes brotli compression support
-
 # Production monitoring and logging
-sentry-sdk[django]>=2.42.1,<3.0 # Error tracking and performance monitoring
+sentry-sdk[django]>=2.54.0,<3.0 # Error tracking and performance monitoring
+
+# Simplified static file serving for production
+whitenoise[brotli]>=6.12.0,<7.0 # Includes brotli compression support
 
 # Add any other production-specific dependencies here
-# e.g., monitoring agents, specific logging libraries 
+# e.g., monitoring agents, specific logging libraries

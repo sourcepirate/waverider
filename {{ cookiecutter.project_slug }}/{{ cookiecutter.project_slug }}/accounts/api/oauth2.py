@@ -10,7 +10,9 @@ This module contains OAuth2 authentication endpoints including:
 from ninja import Router
 
 # Import the OAuth2 router from the oauth2 package
-from {{ cookiecutter.project_slug }}.accounts.oauth2.api import router as oauth2_base_router
+from {{cookiecutter.project_slug}}.accounts.oauth2.api import (
+    router as oauth2_base_router,
+)
 
 # Initialize the OAuth2 API router
 router = Router()

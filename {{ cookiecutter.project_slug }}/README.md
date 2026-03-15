@@ -182,4 +182,4 @@ Deploying this project involves several steps beyond the scope of this README. K
 *   **Media Files:** Configure `MEDIA_ROOT` and `MEDIA_URL`. Production usually requires a persistent shared storage solution (like AWS S3, Google Cloud Storage) rather than the local filesystem.
 *   **Celery:** Run Celery workers and Celery Beat as persistent background services (e.g., using `systemd` or `supervisor`).
 *   **Database/Redis:** Use managed database and Redis services or properly secured and backed-up instances.
-*   **Security:** Review Django's deployment checklist: [https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/](https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/) 
+*   **Security:** Review Django's deployment checklist: [https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/](https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/)

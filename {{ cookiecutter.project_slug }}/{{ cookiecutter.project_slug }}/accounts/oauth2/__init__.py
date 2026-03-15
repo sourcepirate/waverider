@@ -5,9 +5,16 @@ This package provides OAuth2 authentication functionality for Google, GitHub, an
 It includes provider configuration, user data normalization, and API endpoints.
 """
 
-from {{ cookiecutter.project_slug }}.accounts.oauth2.providers import OAUTH2_PROVIDERS, get_oauth2_config
-from {{ cookiecutter.project_slug }}.accounts.oauth2.utils import exchange_code_for_token, get_user_info, normalize_user_data
-from {{ cookiecutter.project_slug }}.accounts.oauth2.api import router as oauth2_router
+from {{cookiecutter.project_slug}}.accounts.oauth2.api import router as oauth2_router
+from {{cookiecutter.project_slug}}.accounts.oauth2.providers import (
+    OAUTH2_PROVIDERS,
+    get_oauth2_config,
+)
+from {{cookiecutter.project_slug}}.accounts.oauth2.utils import (
+    exchange_code_for_token,
+    get_user_info,
+    normalize_user_data,
+)
 
 __all__ = [
     'OAUTH2_PROVIDERS',

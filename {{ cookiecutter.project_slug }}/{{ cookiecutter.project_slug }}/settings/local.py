@@ -1,6 +1,8 @@
-from .base import *
 import os
-from decouple import config, Csv  # Using python-decouple for env vars
+
+from decouple import Csv, config  # Using python-decouple for env vars
+
+from .base import *
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True

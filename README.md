@@ -64,7 +64,7 @@ Run all tests across multiple Python versions:
 # Run basic validation
 tox -e validate
 
-# Run quick tests  
+# Run quick tests
 tox -e quick-test
 
 # Run template tests

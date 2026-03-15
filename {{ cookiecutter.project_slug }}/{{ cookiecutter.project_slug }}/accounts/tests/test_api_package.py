@@ -8,17 +8,26 @@ This module contains all tests for user-related API endpoints including:
 - Provider configuration and utilities
 """
 
-from django.test import TestCase
-from django.contrib.auth.models import User
-from unittest.mock import patch, MagicMock
-from django.core.cache import cache
-from rest_framework_simplejwt.tokens import RefreshToken
 import json
+from unittest.mock import MagicMock, patch
+
+from django.contrib.auth.models import User
+from django.core.cache import cache
+from django.test import TestCase
+from rest_framework_simplejwt.tokens import RefreshToken
 
 # Import OAuth2 modules for testing
 try:
-    from {{ cookiecutter.project_slug }}.accounts.oauth2.providers import get_oauth2_config, get_available_providers, OAUTH2_PROVIDERS
-    from {{ cookiecutter.project_slug }}.accounts.oauth2.utils import normalize_user_data, exchange_code_for_token, get_user_info
+    from {{cookiecutter.project_slug}}.accounts.oauth2.providers import (
+        OAUTH2_PROVIDERS,
+        get_available_providers,
+        get_oauth2_config,
+    )
+    from {{cookiecutter.project_slug}}.accounts.oauth2.utils import (
+        exchange_code_for_token,
+        get_user_info,
+        normalize_user_data,
+    )
 except ImportError:
     # Fallback for testing environment
     pass
@@ -26,7 +35,7 @@ except ImportError:
 
 class AuthAPITestCase(TestCase):
     """Test authentication API endpoints (/api/accounts/auth/)."""
-    
+
     def setUp(self):
         self.base_url = '/api/accounts/auth'
         self.test_user_data = {
@@ -47,12 +56,12 @@ class AuthAPITestCase(TestCase):
         )
         self.assertEqual(response.status_code, 201)
         self.assertEqual(User.objects.count(), initial_count + 1)
-        
+
         data = response.json()
         self.assertEqual(data['username'], self.test_user_data['username'])
         self.assertEqual(data['email'], self.test_user_data['email'])
         self.assertNotIn('password', data)  # Password should not be returned
-        
+
         # Verify user was created in database
         user = User.objects.get(username=self.test_user_data['username'])
         self.assertEqual(user.email, self.test_user_data['email'])
@@ -67,7 +76,7 @@ class AuthAPITestCase(TestCase):
             password='password123'
         )
         initial_count = User.objects.count()
-        
+
         response = self.client.post(
             f'{self.base_url}/register',
             data=json.dumps(self.test_user_data),
@@ -87,7 +96,7 @@ class AuthAPITestCase(TestCase):
             password='password123'
         )
         initial_count = User.objects.count()
-        
+
         response = self.client.post(
             f'{self.base_url}/register',
             data=json.dumps(self.test_user_data),
@@ -102,7 +111,7 @@ class AuthAPITestCase(TestCase):
         """Test user registration with invalid email format."""
         invalid_data = self.test_user_data.copy()
         invalid_data['email'] = 'not-an-email'
-        
+
         response = self.client.post(
             f'{self.base_url}/register',
             data=json.dumps(invalid_data),
@@ -115,7 +124,7 @@ class AuthAPITestCase(TestCase):
         """Test user registration with short password."""
         invalid_data = self.test_user_data.copy()
         invalid_data['password'] = 'short'  # Less than 8 characters
-        
+
         response = self.client.post(
             f'{self.base_url}/register',
             data=json.dumps(invalid_data),
@@ -132,12 +141,12 @@ class AuthAPITestCase(TestCase):
             email=self.test_user_data['email'],
             password=self.test_user_data['password']
         )
-        
+
         login_data = {
             'username': self.test_user_data['username'],
             'password': self.test_user_data['password']
         }
-        
+
         response = self.client.post(
             f'{self.base_url}/login',
             data=json.dumps(login_data),
@@ -158,12 +167,12 @@ class AuthAPITestCase(TestCase):
             email=self.test_user_data['email'],
             password=self.test_user_data['password']
         )
-        
+
         login_data = {
             'username': self.test_user_data['username'],
             'password': 'wrongpassword'
         }
-        
+
         response = self.client.post(
             f'{self.base_url}/login',
             data=json.dumps(login_data),
@@ -179,7 +188,7 @@ class AuthAPITestCase(TestCase):
             'username': 'nonexistent',
             'password': 'password123'
         }
-        
+
         response = self.client.post(
             f'{self.base_url}/login',
             data=json.dumps(login_data),
@@ -192,7 +201,7 @@ class AuthAPITestCase(TestCase):
 
 class UsersAPITestCase(TestCase):
     """Test user management API endpoints (/api/accounts/users/)."""
-    
+
     def setUp(self):
         self.base_url = '/api/accounts/users'
         self.user = User.objects.create_user(
@@ -231,7 +240,7 @@ class UsersAPITestCase(TestCase):
             'last_name': 'Name',
             'email': 'updated@example.com'
         }
-        
+
         response = self.client.put(
             f'{self.base_url}/me',
             data=json.dumps(update_data),
@@ -239,7 +248,7 @@ class UsersAPITestCase(TestCase):
             **self.auth_headers
         )
         self.assertEqual(response.status_code, 200)
-        
+
         # Verify user was updated
         self.user.refresh_from_db()
         self.assertEqual(self.user.first_name, 'Updated')
@@ -254,11 +263,11 @@ class UsersAPITestCase(TestCase):
             email='other@example.com',
             password='password123'
         )
-        
+
         update_data = {
             'email': 'other@example.com'
         }
-        
+
         response = self.client.put(
             f'{self.base_url}/me',
             data=json.dumps(update_data),
@@ -287,10 +296,10 @@ class UsersAPITestCase(TestCase):
     def test_delete_current_user_success(self):
         """Test deleting current user account."""
         user_id = self.user.id
-        
+
         response = self.client.delete(f'{self.base_url}/me', **self.auth_headers)
         self.assertEqual(response.status_code, 204)
-        
+
         # Verify user was deleted
         with self.assertRaises(User.DoesNotExist):
             User.objects.get(id=user_id)
@@ -303,14 +312,14 @@ class UsersAPITestCase(TestCase):
 
 class OAuth2ProvidersTestCase(TestCase):
     """Test OAuth2 provider configuration and utilities."""
-    
+
     def test_oauth2_providers_config_structure(self):
         """Test OAuth2 providers configuration structure."""
         try:
             self.assertIn('google', OAUTH2_PROVIDERS)
             self.assertIn('github', OAUTH2_PROVIDERS)
             self.assertIn('facebook', OAUTH2_PROVIDERS)
-            
+
             for provider, config in OAUTH2_PROVIDERS.items():
                 self.assertIn('authorization_url', config)
                 self.assertIn('token_url', config)
@@ -320,7 +329,7 @@ class OAuth2ProvidersTestCase(TestCase):
                 self.assertIn('client_secret_setting', config)
         except NameError:
             self.skipTest("OAuth2 providers not available in test environment")
-    
+
     def test_get_oauth2_config_valid_provider(self):
         """Test getting OAuth2 config for valid provider."""
         try:
@@ -332,7 +341,7 @@ class OAuth2ProvidersTestCase(TestCase):
                     self.assertIn('authorization_url', config)
         except NameError:
             self.skipTest("OAuth2 config function not available in test environment")
-    
+
     def test_get_oauth2_config_invalid_provider(self):
         """Test getting OAuth2 config for invalid provider."""
         try:
@@ -341,7 +350,7 @@ class OAuth2ProvidersTestCase(TestCase):
             self.assertIn('Unsupported OAuth2 provider', str(context.exception))
         except NameError:
             self.skipTest("OAuth2 config function not available in test environment")
-    
+
     def test_get_oauth2_config_missing_credentials(self):
         """Test getting OAuth2 config with missing credentials."""
         try:
@@ -351,7 +360,7 @@ class OAuth2ProvidersTestCase(TestCase):
                 self.assertIn('OAuth2 credentials not configured', str(context.exception))
         except NameError:
             self.skipTest("OAuth2 config function not available in test environment")
-    
+
     def test_get_available_providers(self):
         """Test getting list of available providers."""
         try:
@@ -365,7 +374,7 @@ class OAuth2ProvidersTestCase(TestCase):
 
 class OAuth2UtilsTestCase(TestCase):
     """Test OAuth2 utility functions."""
-    
+
     def test_normalize_google_data(self):
         """Test user data normalization for Google."""
         try:
@@ -375,9 +384,9 @@ class OAuth2UtilsTestCase(TestCase):
                 'given_name': 'Test',
                 'family_name': 'User'
             }
-            
+
             normalized = normalize_user_data('google', user_info)
-            
+
             self.assertEqual(normalized['email'], 'test@example.com')
             self.assertEqual(normalized['first_name'], 'Test')
             self.assertEqual(normalized['last_name'], 'User')
@@ -385,7 +394,7 @@ class OAuth2UtilsTestCase(TestCase):
             self.assertEqual(normalized['provider_id'], '12345')
         except NameError:
             self.skipTest("OAuth2 utils not available in test environment")
-    
+
     def test_normalize_github_data(self):
         """Test user data normalization for GitHub."""
         try:
@@ -395,9 +404,9 @@ class OAuth2UtilsTestCase(TestCase):
                 'login': 'testuser',
                 'name': 'Test User'
             }
-            
+
             normalized = normalize_user_data('github', user_info)
-            
+
             self.assertEqual(normalized['email'], 'test@example.com')
             self.assertEqual(normalized['first_name'], 'Test')
             self.assertEqual(normalized['last_name'], 'User')
@@ -405,7 +414,7 @@ class OAuth2UtilsTestCase(TestCase):
             self.assertEqual(normalized['provider_id'], '12345')
         except NameError:
             self.skipTest("OAuth2 utils not available in test environment")
-    
+
     def test_normalize_facebook_data(self):
         """Test user data normalization for Facebook."""
         try:
@@ -415,9 +424,9 @@ class OAuth2UtilsTestCase(TestCase):
                 'first_name': 'Test',
                 'last_name': 'User'
             }
-            
+
             normalized = normalize_user_data('facebook', user_info)
-            
+
             self.assertEqual(normalized['email'], 'test@example.com')
             self.assertEqual(normalized['first_name'], 'Test')
             self.assertEqual(normalized['last_name'], 'User')
@@ -429,7 +438,7 @@ class OAuth2UtilsTestCase(TestCase):
 
 class OAuth2APITestCase(TestCase):
     """Test OAuth2 API endpoints (/api/accounts/oauth2/)."""
-    
+
     def setUp(self):
         self.base_url = '/api/accounts/oauth2'
         cache.clear()
@@ -494,13 +503,13 @@ class OAuth2APITestCase(TestCase):
             'state': 'invalid-state',
             'redirect_uri': 'http://localhost:8000/callback'
         }
-        
+
         response = self.client.post(
             f'{self.base_url}/callback',
             data=json.dumps(payload),
             content_type='application/json'
         )
-        
+
         if response.status_code in [400, 404]:
             if response.status_code == 400:
                 data = response.json()
@@ -511,7 +520,7 @@ class OAuth2APITestCase(TestCase):
 
 class APIIntegrationTestCase(TestCase):
     """Integration tests for the entire API package."""
-    
+
     def test_api_package_structure(self):
         """Test that the API package structure is correct."""
         # Test that core endpoints exist and return proper error codes
@@ -519,31 +528,31 @@ class APIIntegrationTestCase(TestCase):
             ('/api/accounts/auth/register', 'POST'),
             ('/api/accounts/auth/login', 'POST'),
         ]
-        
+
         users_endpoints = [
             ('/api/accounts/users/me', 'GET'),
             ('/api/accounts/users/1', 'GET'),
         ]
-        
+
         oauth2_endpoints = [
             ('/api/accounts/oauth2/providers', 'GET'),
             ('/api/accounts/oauth2/authorize', 'POST'),
             ('/api/accounts/oauth2/callback', 'POST'),
         ]
-        
+
         all_endpoints = auth_endpoints + users_endpoints + oauth2_endpoints
-        
+
         for endpoint, method in all_endpoints:
             self.assertTrue(endpoint.startswith('/api/accounts/'))
-            
+
             # Test that endpoints exist (should return something, not 404)
             if method == 'GET':
                 response = self.client.get(endpoint)
             else:
                 response = self.client.post(endpoint, content_type='application/json')
-            
+
             # We expect various status codes but not 404 (endpoint not found)
-            self.assertNotEqual(response.status_code, 404, 
+            self.assertNotEqual(response.status_code, 404,
                               f"Endpoint {endpoint} not found (404)")
 
     def test_authentication_flow(self):
@@ -556,40 +565,40 @@ class APIIntegrationTestCase(TestCase):
             'first_name': 'Flow',
             'last_name': 'Test'
         }
-        
+
         register_response = self.client.post(
             '/api/accounts/auth/register',
             data=json.dumps(user_data),
             content_type='application/json'
         )
-        
+
         if register_response.status_code == 201:
             # 2. Login user
             login_data = {
                 'username': user_data['username'],
                 'password': user_data['password']
             }
-            
+
             login_response = self.client.post(
                 '/api/accounts/auth/login',
                 data=json.dumps(login_data),
                 content_type='application/json'
             )
-            
+
             self.assertEqual(login_response.status_code, 200)
             login_result = login_response.json()
             self.assertIn('access', login_result)
-            
+
             # 3. Use token to access protected endpoint
             auth_headers = {
                 'HTTP_AUTHORIZATION': f'Bearer {login_result["access"]}'
             }
-            
+
             profile_response = self.client.get(
                 '/api/accounts/users/me',
                 **auth_headers
             )
-            
+
             if profile_response.status_code == 200:
                 profile_data = profile_response.json()
                 self.assertEqual(profile_data['username'], user_data['username'])
@@ -603,7 +612,7 @@ class APIIntegrationTestCase(TestCase):
             'username': 'nonexistent',
             'password': 'wrongpassword'
         }
-        
+
         response = self.client.post(
             f'{self.base_url}/login',
             data=json.dumps(login_data),
@@ -616,7 +625,7 @@ class APIIntegrationTestCase(TestCase):
 
 class APIPackageIntegrationTestCase(TestCase):
     """Test integration of all API packages."""
-    
+
     def test_api_endpoints_structure(self):
         """Test that all API endpoints are properly structured."""
         # Test auth endpoints
@@ -624,25 +633,25 @@ class APIPackageIntegrationTestCase(TestCase):
             '/api/accounts/auth/register',
             '/api/accounts/auth/login'
         ]
-        
+
         # Test users endpoints
         users_endpoints = [
             '/api/accounts/users/me',
         ]
-        
+
         # Test oauth2 endpoints
         oauth2_endpoints = [
             '/api/accounts/oauth2/providers',
             '/api/accounts/oauth2/authorize',
             '/api/accounts/oauth2/callback'
         ]
-        
+
         # These should all be valid URL patterns (testing structure, not functionality)
         all_endpoints = auth_endpoints + users_endpoints + oauth2_endpoints
-        
+
         # Just verify the test structure is valid
         self.assertTrue(len(all_endpoints) > 0)
-        
+
         for endpoint in all_endpoints:
             self.assertTrue(endpoint.startswith('/api/accounts/'))
             self.assertIn('/', endpoint)
