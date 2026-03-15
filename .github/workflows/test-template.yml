@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11"]
+        python-version: ["3.10", "3.11", "3.12"]
 
     steps:
     - uses: actions/checkout@v4
@@ -53,3 +53,27 @@ jobs:
     - name: Run comprehensive tests
       run: |
         tox -e all-tests
+
+  dependency-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install cookiecutter
+      run: pip install cookiecutter
+      
+    - name: Generate template
+      run: |
+        cookiecutter . --no-input --output-dir /tmp/test-project project_name="Test Project" project_slug="test_project"
+        
+    - name: Check dependencies compatibility
+      run: |
+        cd /tmp/test-project/test_project
+        pip install -r requirements/local.txt
+        pip check
