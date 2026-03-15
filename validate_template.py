@@ -154,7 +154,13 @@ class TestTemplateStructure:
                         continue
 
                     # Try to compile the Python code
-                    compile(content, py_file, "exec")
+                    try:
+                        compile(content, py_file, "exec")
+                    except SyntaxError:
+                        # Skip if there are template variables like {{ project_slug }}
+                        if "{{" in content and "}}" in content:
+                            continue
+                        raise
             except SyntaxError as e:
                 relative_path = os.path.relpath(py_file, self.template_dir)
                 syntax_errors.append(f"{relative_path}: {e}")
