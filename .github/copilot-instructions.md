@@ -5,7 +5,7 @@
 ## Architecture Overview
 
 ### Core Stack
-- **Web Framework**: Django 5.2.x (LTS) - NOT compatible with Django 6.0
+- **Web Framework**: Django 6.0.x
 - **API Layer**: Django Ninja (type-hinted async-ready), NOT Django REST Framework
 - **Task Queue**: Celery 5.x with Redis broker/backend
 - **Auth**: JWT (SimpleJWT) + OAuth2 (django-oauth-toolkit) + Social auth
@@ -136,7 +136,7 @@ tox -e lint            # flake8 + black + isort checks
 
 ## Known Constraints & Gotchas
 
-1. **Django version**: Locked to 5.2.x - Django 6.0 incompatibility tracked in base.txt comment
+1. **Django version**: Using Django 6.x
 2. **NinjaAPI single instance**: Must be created in urls.py (not app-level routers)
 3. **Celery settings namespace**: All Celery config must use `CELERY_` prefix (e.g., `CELERY_BROKER_URL`)
 4. **PostgreSQL required**: No SQLite for production; psycopg2-binary ensures no compilation
