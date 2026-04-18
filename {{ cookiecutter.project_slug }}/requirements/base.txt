@@ -4,11 +4,11 @@
 django>=6.0.0,<7.0 # Use Django 6.x
 
 # API Framework
-django-ninja>=1.6.0,<2.0
+django-ninja>=1.6.2,<2.0
 
 # Celery and related packages
-celery>=5.6.2,<6.0
-redis>=7.3.0,<8.0 # Python client for Redis (used by Celery)
+celery>=5.6.3,<6.0
+redis>=7.4.0,<8.0 # Python client for Redis (used by Celery)
 django-celery-beat>=2.9.0,<3.0 # Database-backed periodic task scheduler
 django-celery-results>=2.6.0,<3.0 # Celery result backend using Django ORM
 
@@ -27,7 +27,7 @@ requests-oauthlib>=2.0.0,<3.0 # OAuth2 client library
 social-auth-app-django>=5.7.0,<6.0 # Social authentication (Google, GitHub, etc.)
 
 # Object-level Permissions
-django-guardian>=3.3.0,<4.0
+django-guardian>=3.3.1,<4.0
 
 # Environment variable management
 python-decouple>=3.8,<4.0
@@ -35,4 +35,4 @@ python-decouple>=3.8,<4.0
 dj-database-url>=3.1.2,<4.0
 
 # WSGI server for production
-gunicorn>=25.1.0,<26.0
+gunicorn>=25.3.0,<26.0
