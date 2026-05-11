@@ -13,7 +13,7 @@ django-celery-beat>=2.9.0,<3.0 # Database-backed periodic task scheduler
 django-celery-results>=2.6.0,<3.0 # Celery result backend using Django ORM
 
 # Database driver (PostgreSQL)
-psycopg2-binary>=2.9.11,<3.0 # Use binary for easier installation
+psycopg[binary]>=3.2.0,<4.0 # Use psycopg 3 binary for easier installation and modern Django support
 
 # Cache backend (Redis)
 django-redis>=6.0.0,<7.0
