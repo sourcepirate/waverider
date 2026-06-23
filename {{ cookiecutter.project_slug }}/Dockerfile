@@ -9,11 +9,11 @@ ENV PYTHONUNBUFFERED 1
 WORKDIR /app
 
 # Install system dependencies
-# Add build-essential and libpq-dev temporarily for building psycopg2 if not using binary
+# Add build-essential and libpq-dev temporarily for building psycopg if not using binary
 # Add gettext for internationalization support if needed
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-    # Required for psycopg2 non-binary builds (keep if switching from -binary)
+    # Required for psycopg non-binary builds (keep if switching from -binary)
     # build-essential libpq-dev \
     # Optional: For PostgreSQL client tools (psql)
     postgresql-client \
