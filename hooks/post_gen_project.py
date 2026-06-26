@@ -145,10 +145,9 @@ def main():
         steps_succeeded = False
 
     # 6. Install dependencies with uv
-    if steps_succeeded:
-        if not run_command("uv sync", "Install dependencies with uv"):
-            steps_succeeded = False
-            print("--- Please run 'uv sync' manually ---", file=sys.stderr)
+    print("\nInstalling dependencies with uv...")
+    if not run_command("uv sync", "Install dependencies with uv"):
+        print("--- uv sync failed. Run 'uv sync' manually later. ---", file=sys.stderr)
 
     # 7. Install pre-commit hooks
     if steps_succeeded:

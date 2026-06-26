@@ -49,8 +49,8 @@ prod = [
 {% endif %}
 ]
 
-[dependency-groups]
-dev = []
+[tool.uv]
+package = true
 
 
 [tool.ruff]

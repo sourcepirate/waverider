@@ -19,9 +19,6 @@ dev = [
 [tool.uv]
 package = false
 
-[dependency-groups]
-dev = []
-
 [tool.ruff]
 exclude = [
     ".git",

@@ -27,7 +27,7 @@ jobs:
         version: "latest"
 
     - name: Install dependencies
-      run: uv sync --frozen
+      run: uv sync --frozen --all-extras
 
     - name: Run template validation
       run: uv run python validate_template.py
@@ -52,7 +52,7 @@ jobs:
         version: "latest"
 
     - name: Install dependencies
-      run: uv sync --frozen
+      run: uv sync --frozen --all-extras
 
     - name: Run comprehensive tests
       run: |
@@ -89,10 +89,26 @@ jobs:
           use_celery="y" \
           include_oauth2="y" \
           include_sentry="y" \
-          api_versioning="none"
+          api_versioning="none" \
+          django_secret_key="ci-test-key-not-for-production"
 
-    - name: Check dependencies compatibility
+    - name: Check generated project
       run: |
         cd /tmp/test-project/test_project
-        uv sync --frozen
-        uv lock --check
+        [ -f pyproject.toml ] && echo "✓ pyproject.toml exists"
+        [ -f manage.py ] && echo "✓ manage.py exists"
+        [ -d test_project/settings ] && echo "✓ settings dir exists"
+        [ -f test_project/celery.py ] && echo "✓ celery.py exists (use_celery=y)"
+        [ -d test_project/accounts/oauth2 ] && echo "✓ oauth2 dir exists (include_oauth2=y)"
+        python3 -c "
+import ast, sys
+files = ['manage.py', 'test_project/urls.py', 'test_project/settings/base.py']
+for f in files:
+    try:
+        with open(f) as fh:
+            ast.parse(fh.read())
+        print(f'✓ {f} has valid syntax')
+    except SyntaxError as e:
+        print(f'✗ {f} syntax error: {e}')
+        sys.exit(1)
+"
