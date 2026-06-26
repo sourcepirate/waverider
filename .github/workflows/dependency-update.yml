@@ -1,0 +1,53 @@
+name: Dependency Update
+
+on:
+  schedule:
+    - cron: "0 9 * * 1"
+  workflow_dispatch:
+
+jobs:
+  update-deps:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Run opencode
+        uses: anomalyco/opencode/github@latest
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+        with:
+          model: opencode/deepseek-v4-flash-free
+          prompt: |
+            This is a cookiecutter template project. Dependencies are defined in TWO pyproject.toml files:
+
+            1. ./pyproject.toml (root - template's own dev dependencies)
+            2. ./{{ cookiecutter.project_slug }}/pyproject.toml (template - has Jinja2 {% if %} conditionals like {% if cookiecutter.use_celery == 'y' %} - you MUST preserve these blocks exactly)
+
+            Your task is to check for newer stable versions and update version constraints for:
+
+            - Django (currently "django>=5.2,<6.0" in both files)
+            - django-ninja (currently "django-ninja>=1.6,<2.0" in both files)
+            - Celery (currently "celery>=5.6,<6.0" in the template file, inside a Jinja2 conditional block)
+
+            For each dependency:
+            - If a newer MAJOR version is out (e.g. Django 6.0), bump the upper bound: ">=5.2,<7.0"
+            - If a newer MINOR/PATCH is out within the current major, bump the lower bound: ">=5.3,<6.0"
+            - If the latest version hasn't changed, leave it alone
+
+            Do NOT modify any other dependencies or files.
+
+            After updating:
+            1. Run 'uv lock' to regenerate the lock file
+            2. Run 'uv sync --frozen --all-extras' to install
+            3. Run 'uv run python validate_template.py' to validate the template
+            4. Run 'uv run python -m pytest tests/test_cookiecutter.py -v' to run tests
+
+            If all tests pass, open a PR titled "chore: bump Django/Celery/django-ninja to latest" with a summary of version changes.
+
+            If any test fails, do NOT open a PR. Instead, open an issue titled "Dependency update failed" describing what broke.
