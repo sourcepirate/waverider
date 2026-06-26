@@ -100,15 +100,4 @@ jobs:
         [ -d test_project/settings ] && echo "✓ settings dir exists"
         [ -f test_project/celery.py ] && echo "✓ celery.py exists (use_celery=y)"
         [ -d test_project/accounts/oauth2 ] && echo "✓ oauth2 dir exists (include_oauth2=y)"
-        python3 -c "
-import ast, sys
-files = ['manage.py', 'test_project/urls.py', 'test_project/settings/base.py']
-for f in files:
-    try:
-        with open(f) as fh:
-            ast.parse(fh.read())
-        print(f'✓ {f} has valid syntax')
-    except SyntaxError as e:
-        print(f'✗ {f} syntax error: {e}')
-        sys.exit(1)
-"
+        python -m compileall -q -x "\.venv|__pycache__" . 2>&1 && echo "✓ All Python files have valid syntax"
