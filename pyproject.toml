@@ -1,3 +1,27 @@
+[project]
+name = "cookiecutter-django-ninja-oauth2"
+version = "0.1.0"
+description = "Cookiecutter template for Django + Ninja + Celery + OAuth2"
+requires-python = ">=3.12"
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=9.0",
+    "pytest-cov>=7.0",
+    "pytest-mock>=3.0",
+    "cookiecutter>=2.7",
+    "tox>=4.0",
+    "pyyaml>=6.0",
+    "ruff>=0.9",
+]
+
+[tool.uv]
+package = false
+
+[dependency-groups]
+dev = []
+
 [tool.ruff]
 exclude = [
     ".git",
@@ -9,4 +33,7 @@ exclude = [
     "*cookiecutter.project_slug*",
 ]
 force-exclude = true
-line-length = 88
+line-length = 100
+
+[tool.pytest.ini_options]
+python_files = ["tests.py", "test_*.py"]
