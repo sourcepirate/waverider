@@ -68,7 +68,7 @@ def oauth2_authorize(request, payload: OAuth2AuthorizeSchema):
     state = payload.state or secrets.token_urlsafe(32)
     
     # Cache the state and redirect_uri for verification
-    cache_key = f"oauth2_state_{state}"
+    cache_key = f"{{ cookiecutter.project_slug }}:oauth2_state:{state}"
     cache.set(cache_key, {
         'provider': payload.provider,
         'redirect_uri': payload.redirect_uri
@@ -111,7 +111,7 @@ def oauth2_callback(request, payload: OAuth2CallbackSchema):
     """
     # Verify state parameter for CSRF protection
     if payload.state:
-        cache_key = f"oauth2_state_{payload.state}"
+        cache_key = f"{{ cookiecutter.project_slug }}:oauth2_state:{payload.state}"
         cached_data = cache.get(cache_key)
         if not cached_data:
             return 400, {

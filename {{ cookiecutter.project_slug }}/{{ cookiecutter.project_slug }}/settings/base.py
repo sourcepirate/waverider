@@ -48,12 +48,13 @@ DJANGO_APPS = [
 THIRD_PARTY_APPS = [
     'django_celery_beat',       # Celery Periodic Tasks Scheduler
     'django_celery_results',    # Celery Result Backend using Django ORM
-    # 'ninja',                 # Django Ninja doesn't need to be in INSTALLED_APPS
     'rest_framework_simplejwt', # JWT Authentication
     'guardian',                 # Object-level Permissions
-    'django_redis',             # Redis Cache Backend (needed if using it directly, not just via settings)
+    'django_redis',             # Redis Cache Backend
+{% if cookiecutter.include_oauth2 == 'y' %}
     'oauth2_provider',          # OAuth2 Provider (django-oauth-toolkit)
     'social_django',            # Social Authentication (social-auth-app-django)
+{% endif %}
 ]
 
 LOCAL_APPS = [
@@ -164,6 +165,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'mediafiles')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
+{% if cookiecutter.use_celery == 'y' %}
 # Celery Configuration Options
 # https://docs.celeryq.dev/en/stable/userguide/configuration.html
 CELERY_BROKER_URL = "{{ cookiecutter.celery_broker_url }}"
@@ -176,6 +178,7 @@ CELERY_TIMEZONE = TIME_ZONE
 CELERY_RESULT_EXTENDED = True
 # Make Celery Beat use the Django database scheduler
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+{% endif %}
 
 
 # Django Ninja settings (usually not needed in settings.py, configuration is in urls.py)
@@ -229,9 +232,8 @@ SIMPLE_JWT = {
 }
 
 
+{% if cookiecutter.include_oauth2 == 'y' %}
 # OAuth2 Settings
-# Configure these in your environment-specific settings (local.py, production.py)
-
 GOOGLE_OAUTH2_CLIENT_ID = os.getenv("GOOGLE_OAUTH2_CLIENT_ID", None)
 GOOGLE_OAUTH2_CLIENT_SECRET = os.getenv("GOOGLE_OAUTH2_CLIENT_SECRET", None)
 
@@ -244,10 +246,8 @@ FACEBOOK_OAUTH2_CLIENT_SECRET = os.getenv("FACEBOOK_OAUTH2_CLIENT_SECRET", None)
 # Social Auth Settings (for social-auth-app-django)
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = GOOGLE_OAUTH2_CLIENT_ID
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = GOOGLE_OAUTH2_CLIENT_SECRET
-
 SOCIAL_AUTH_GITHUB_KEY = GITHUB_OAUTH2_CLIENT_ID
 SOCIAL_AUTH_GITHUB_SECRET = GITHUB_OAUTH2_CLIENT_SECRET
-
 SOCIAL_AUTH_FACEBOOK_KEY = FACEBOOK_OAUTH2_CLIENT_ID
 SOCIAL_AUTH_FACEBOOK_SECRET = FACEBOOK_OAUTH2_CLIENT_SECRET
 
@@ -263,3 +263,4 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.load_extra_data',
     'social_core.pipeline.user.user_details',
 )
+{% endif %}

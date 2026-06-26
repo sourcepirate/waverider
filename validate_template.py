@@ -63,6 +63,7 @@ class TestTemplateStructure:
             "hooks/post_gen_project.py",
             "{{ cookiecutter.project_slug }}/manage.py",
             "{{ cookiecutter.project_slug }}/README.md",
+            "{{ cookiecutter.project_slug }}/pyproject.toml",
             "{{ cookiecutter.project_slug }}/docker-compose.yml",
             "{{ cookiecutter.project_slug }}/Dockerfile",
             "{{ cookiecutter.project_slug }}/requirements/base.txt",
@@ -171,29 +172,18 @@ class TestTemplateStructure:
         return True
 
     def test_requirements_files_content(self):
-        """Test that requirements files have valid content."""
-        requirements_files = [
-            "{{ cookiecutter.project_slug }}/requirements/base.txt",
-            "{{ cookiecutter.project_slug }}/requirements/local.txt",
-            "{{ cookiecutter.project_slug }}/requirements/production.txt",
-        ]
+        """Test that requirements or pyproject.toml files have valid content."""
+        # Check pyproject.toml exists (primary dependency file)
+        project_dir = os.path.join(
+            self.template_dir, "{{ cookiecutter.project_slug }}"
+        )
+        pyproject_path = os.path.join(project_dir, "pyproject.toml")
+        assert os.path.exists(pyproject_path), "pyproject.toml should exist"
+        with open(pyproject_path, "r") as f:
+            content = f.read()
+            assert "django" in content.lower(), "Django missing from pyproject.toml"
 
-        for req_file in requirements_files:
-            full_path = os.path.join(self.template_dir, req_file)
-            assert os.path.exists(full_path), f"Requirements file missing: {req_file}"
-
-            with open(full_path, "r") as f:
-                content = f.read().strip()
-                assert content, f"Requirements file is empty: {req_file}"
-
-                # Check for basic Django requirements
-                if "base.txt" in req_file:
-                    assert "Django" in content, f"Django missing from {req_file}"
-                    assert "django-ninja" in content, (
-                        f"django-ninja missing from {req_file}"
-                    )
-
-        print("✓ All requirements files have valid content")
+        print("✓ pyproject.toml exists with required dependencies")
 
     def test_docker_files_content(self):
         """Test that Docker files have valid content."""
@@ -211,12 +201,11 @@ class TestTemplateStructure:
             assert "FROM python" in dockerfile_content, (
                 "Dockerfile should use Python base image"
             )
-            assert (
-                "COPY requirements" in dockerfile_content
-                or "COPY ./requirements" in dockerfile_content
-            ), "Dockerfile should copy requirements"
-            assert "RUN pip install" in dockerfile_content, (
-                "Dockerfile should install dependencies"
+            assert "uv sync" in dockerfile_content, (
+                "Dockerfile should use uv sync"
+            )
+            assert "RUN pip install" not in dockerfile_content, (
+                "uv migration complete - should not use pip install"
             )
 
         # Test docker-compose.yml

@@ -38,6 +38,7 @@ DATABASES = {
 # DATABASES['default'] = config('DATABASE_URL', cast=db_url, default=f"postgres://{DATABASES['default']['USER']}:{DATABASES['default']['PASSWORD']}@{DATABASES['default']['HOST']}:{DATABASES['default']['PORT']}/{DATABASES['default']['NAME']}")
 
 
+{% if cookiecutter.use_celery == 'y' %}
 # Celery (can override base settings if needed, e.g., different broker for local)
 # Reads from .env or defaults provided in cookiecutter.json / docker-compose.yml
 CELERY_BROKER_URL = config(
@@ -46,6 +47,7 @@ CELERY_BROKER_URL = config(
 CELERY_RESULT_BACKEND = config(
     "CELERY_RESULT_BACKEND", default="{{ cookiecutter.celery_result_backend }}"
 )
+{% endif %}
 
 
 # Email backend for development (prints emails to console)

@@ -1,18 +1,4 @@
 # Requirements for local development
-# Includes base requirements plus development tools
-
--r base.txt
-
-# Useful Django extensions (runserver_plus, shell_plus, etc.)
-django-extensions>=4.1,<5.0
-# For debugging in the browser
-django-debug-toolbar>=6.3.0,<7.0
-# Werkzeug might be needed by runserver_plus or debug toolbar in some cases
-Werkzeug>=3.1.8,<4.0
-
-# Testing libraries
-pytest>=9.0.3,<10.0
-pytest-django>=4.12.0,<5.0
-
-# Code formatting and linting
-ruff>=0.9.0,<1.0.0 
+#
+# DEPRECATED: Use `uv sync` with pyproject.toml instead.
+# Install with: uv sync

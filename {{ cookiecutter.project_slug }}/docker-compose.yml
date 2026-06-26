@@ -54,7 +54,6 @@ services:
       - "8000:8000"
     environment:
       - DJANGO_SETTINGS_MODULE={{ cookiecutter.project_slug }}.settings.local
-      - DJANGO_SECRET_KEY={{ cookiecutter.django_secret_key }} # Can be overridden by .env
       - POSTGRES_DB={{ cookiecutter.postgresql_db }}
       - POSTGRES_USER={{ cookiecutter.postgresql_user }}
       - POSTGRES_PASSWORD={{ cookiecutter.postgresql_password }}
@@ -84,7 +83,6 @@ services:
       - media_volume:/app/media
     environment:
       - DJANGO_SETTINGS_MODULE={{ cookiecutter.project_slug }}.settings.local
-      - DJANGO_SECRET_KEY={{ cookiecutter.django_secret_key }}
       - POSTGRES_DB={{ cookiecutter.postgresql_db }}
       - POSTGRES_USER={{ cookiecutter.postgresql_user }}
       - POSTGRES_PASSWORD={{ cookiecutter.postgresql_password }}
@@ -92,10 +90,10 @@ services:
       - POSTGRES_PORT=5432
       - CELERY_BROKER_URL={{ cookiecutter.celery_broker_url }}
       - CELERY_RESULT_BACKEND={{ cookiecutter.celery_result_backend }}
-      - CACHE_URL=redis://redis:6379/2 # Added cache URL
+      - CACHE_URL=redis://redis:6379/2
     depends_on:
-      web: # Wait for web to be ready for potential initial setup/migrations
-        condition: service_started # Or customize if web has a healthcheck
+      web:
+        condition: service_started
       redis:
         condition: service_healthy
       db:
@@ -113,7 +111,6 @@ services:
     command: celery -A {{ cookiecutter.project_slug }}.celery beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     environment:
       - DJANGO_SETTINGS_MODULE={{ cookiecutter.project_slug }}.settings.local
-      - DJANGO_SECRET_KEY={{ cookiecutter.django_secret_key }}
       - POSTGRES_DB={{ cookiecutter.postgresql_db }}
       - POSTGRES_USER={{ cookiecutter.postgresql_user }}
       - POSTGRES_PASSWORD={{ cookiecutter.postgresql_password }}
@@ -121,14 +118,14 @@ services:
       - POSTGRES_PORT=5432
       - CELERY_BROKER_URL={{ cookiecutter.celery_broker_url }}
       - CELERY_RESULT_BACKEND={{ cookiecutter.celery_result_backend }}
-      - CACHE_URL=redis://redis:6379/2 # Added cache URL
+      - CACHE_URL=redis://redis:6379/2
     volumes:
       - ./:/app
       - static_volume:/app/staticfiles
       - media_volume:/app/media
     depends_on:
-      web: # Wait for web to be ready for potential initial setup/migrations
-        condition: service_started # Or customize if web has a healthcheck
+      web:
+        condition: service_started
       redis:
         condition: service_healthy
       db:

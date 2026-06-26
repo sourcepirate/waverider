@@ -133,7 +133,7 @@ def _normalize_github_data(
             if email_response.status_code == 200:
                 emails = email_response.json()
                 primary_email = next((e["email"] for e in emails if e["primary"]), None)
-                email = primary_email or emails[0]["email"] if emails else None
+                email = primary_email or (emails[0]["email"] if emails else None)
         except requests.RequestException:
             # If we can't get emails, continue without email
             pass

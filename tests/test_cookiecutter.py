@@ -40,8 +40,14 @@ def test_context():
         "author_name": "Test Author",
         "author_email": "test@example.com",
         "github_username": "testuser",
-        "django_secret_key": "test-secret-key-for-testing-only",
+        "ci_provider": "github",
         "use_docker": "y",
+        "use_celery": "y",
+        "include_oauth2": "y",
+        "oauth2_providers": ["google", "github", "facebook"],
+        "include_sentry": "y",
+        "api_versioning": "none",
+        "django_secret_key": "test-secret-key-for-testing-only",
         "postgresql_user": "test_user",
         "postgresql_password": "test_password",
         "postgresql_db": "test_db",
@@ -70,8 +76,14 @@ class TestCookiecutterTemplate:
             "author_name",
             "author_email",
             "github_username",
-            "django_secret_key",
+            "ci_provider",
             "use_docker",
+            "use_celery",
+            "include_oauth2",
+            "oauth2_providers",
+            "include_sentry",
+            "api_versioning",
+            "django_secret_key",
             "postgresql_user",
             "postgresql_password",
             "postgresql_db",
@@ -324,8 +336,11 @@ class TestCookiecutterTemplate:
             assert "FROM python" in dockerfile_content, (
                 "Dockerfile should use Python base image"
             )
-            assert "COPY ./requirements" in dockerfile_content, (
-                "Dockerfile should copy requirements"
+            assert "uv sync" in dockerfile_content, (
+                "Dockerfile should use uv sync"
+            )
+            assert "COPY pyproject.toml" in dockerfile_content, (
+                "Dockerfile should copy pyproject.toml"
             )
 
         # Check docker-compose content

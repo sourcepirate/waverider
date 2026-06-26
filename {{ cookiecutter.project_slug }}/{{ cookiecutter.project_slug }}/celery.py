@@ -4,10 +4,8 @@ from django.conf import settings
 
 # Set the default Django settings module for the 'celery' program.
 # This must happen before configuring the Celery app instance.
-# We check which settings file to use based on an environment variable.
 # Default to 'local' if not specified.
-settings_module = os.environ.setdefault('DJANGO_SETTINGS_MODULE', '{{ cookiecutter.project_slug }}.settings.local')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', settings_module)
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', '{{ cookiecutter.project_slug }}.settings.local')
 
 app = Celery('{{ cookiecutter.project_slug }}')
 
