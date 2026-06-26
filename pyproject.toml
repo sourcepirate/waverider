@@ -7,13 +7,13 @@ dependencies = []
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=9.0",
-    "pytest-cov>=7.0",
-    "pytest-mock>=3.0",
-    "cookiecutter>=2.7",
-    "tox>=4.0",
-    "pyyaml>=6.0",
-    "ruff>=0.9",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "pytest-mock>=3.15.1",
+    "cookiecutter>=2.7.1",
+    "tox>=4.56.1",
+    "pyyaml>=6.0.3",
+    "ruff>=0.15.20",
 ]
 
 [tool.uv]
