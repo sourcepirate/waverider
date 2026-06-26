@@ -93,9 +93,7 @@ class TestCookiecutterTemplate:
         ]
 
         for field in required_fields:
-            assert field in config, (
-                f"Required field '{field}' missing from cookiecutter.json"
-            )
+            assert field in config, f"Required field '{field}' missing from cookiecutter.json"
 
         # Check that project_slug uses proper template logic
         assert "{{" in config["project_slug"], (
@@ -171,9 +169,7 @@ class TestCookiecutterTemplate:
 
         for file_path in expected_files:
             full_path = os.path.join(accounts_dir, file_path)
-            assert os.path.exists(full_path), (
-                f"Expected accounts file missing: {file_path}"
-            )
+            assert os.path.exists(full_path), f"Expected accounts file missing: {file_path}"
 
     def test_post_gen_hook_exists(self, template_dir):
         """Test that post-generation hook exists and is executable."""
@@ -219,9 +215,7 @@ class TestCookiecutterTemplate:
                 content = f.read()
                 # Check for Django-specific settings
                 if settings_file == "base.py":
-                    assert "INSTALLED_APPS" in content, (
-                        "base.py should contain INSTALLED_APPS"
-                    )
+                    assert "INSTALLED_APPS" in content, "base.py should contain INSTALLED_APPS"
                     assert "MIDDLEWARE" in content, "base.py should contain MIDDLEWARE"
                     assert "DATABASES" in content, "base.py should contain DATABASES"
 
@@ -246,9 +240,7 @@ class TestCookiecutterTemplate:
 
             with open(file_path, "r") as f:
                 content = f.read()
-                assert content.strip(), (
-                    f"OAuth2 file should not be empty: {oauth2_file}"
-                )
+                assert content.strip(), f"OAuth2 file should not be empty: {oauth2_file}"
 
                 # Check for specific content based on file
                 if oauth2_file == "providers.py":
@@ -262,9 +254,7 @@ class TestCookiecutterTemplate:
                         "providers.py should contain Facebook provider"
                     )
                 elif oauth2_file == "api.py":
-                    assert "@router" in content, (
-                        "api.py should contain router decorators"
-                    )
+                    assert "@router" in content, "api.py should contain router decorators"
                     assert "Router" in content, "api.py should import Router"
 
     def test_api_package_structure(self, template_dir):
@@ -289,9 +279,7 @@ class TestCookiecutterTemplate:
                     assert "register" in content.lower(), (
                         "auth.py should contain register functionality"
                     )
-                    assert "login" in content.lower(), (
-                        "auth.py should contain login functionality"
-                    )
+                    assert "login" in content.lower(), "auth.py should contain login functionality"
                 elif api_file == "users.py":
                     assert "router" in content.lower(), "users.py should define router"
                 elif api_file == "__init__.py":
@@ -333,12 +321,8 @@ class TestCookiecutterTemplate:
         # Check Dockerfile content
         with open(dockerfile_path, "r") as f:
             dockerfile_content = f.read()
-            assert "FROM python" in dockerfile_content, (
-                "Dockerfile should use Python base image"
-            )
-            assert "uv sync" in dockerfile_content, (
-                "Dockerfile should use uv sync"
-            )
+            assert "FROM python" in dockerfile_content, "Dockerfile should use Python base image"
+            assert "uv sync" in dockerfile_content, "Dockerfile should use uv sync"
             assert "COPY pyproject.toml" in dockerfile_content, (
                 "Dockerfile should copy pyproject.toml"
             )
@@ -346,27 +330,19 @@ class TestCookiecutterTemplate:
         # Check docker-compose content
         with open(compose_path, "r") as f:
             compose_content = f.read()
-            assert "version:" in compose_content, (
-                "docker-compose.yml should have version"
-            )
-            assert "services:" in compose_content, (
-                "docker-compose.yml should have services"
-            )
+            assert "version:" in compose_content, "docker-compose.yml should have version"
+            assert "services:" in compose_content, "docker-compose.yml should have services"
 
     def test_manage_py_exists(self, template_dir):
         """Test that manage.py exists and has correct content."""
-        manage_path = os.path.join(
-            template_dir, "{{ cookiecutter.project_slug }}/manage.py"
-        )
+        manage_path = os.path.join(template_dir, "{{ cookiecutter.project_slug }}/manage.py")
 
         assert os.path.exists(manage_path), "manage.py should exist"
 
         with open(manage_path, "r") as f:
             content = f.read()
             assert "#!/usr/bin/env python" in content, "manage.py should have shebang"
-            assert "django.core.management" in content, (
-                "manage.py should import Django management"
-            )
+            assert "django.core.management" in content, "manage.py should import Django management"
             assert "execute_from_command_line" in content, (
                 "manage.py should use execute_from_command_line"
             )
@@ -378,9 +354,7 @@ class TestCookiecutterTemplate:
 class TestCookiecutterGeneration:
     """Test the actual cookiecutter generation process."""
 
-    def test_cookiecutter_generation_process(
-        self, temp_dir, template_dir, test_context
-    ):
+    def test_cookiecutter_generation_process(self, temp_dir, template_dir, test_context):
         """Test that cookiecutter can generate a project successfully."""
         pytest.importorskip("cookiecutter")
         from cookiecutter.main import cookiecutter

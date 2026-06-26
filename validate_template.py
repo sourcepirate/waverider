@@ -166,17 +166,13 @@ class TestTemplateStructure:
         if syntax_errors:
             assert False, f"Syntax errors found in non-template files: {syntax_errors}"
 
-        print(
-            f"✓ All {len(python_files)} Python files have valid syntax (template files skipped)"
-        )
+        print(f"✓ All {len(python_files)} Python files have valid syntax (template files skipped)")
         return True
 
     def test_requirements_files_content(self):
         """Test that requirements or pyproject.toml files have valid content."""
         # Check pyproject.toml exists (primary dependency file)
-        project_dir = os.path.join(
-            self.template_dir, "{{ cookiecutter.project_slug }}"
-        )
+        project_dir = os.path.join(self.template_dir, "{{ cookiecutter.project_slug }}")
         pyproject_path = os.path.join(project_dir, "pyproject.toml")
         assert os.path.exists(pyproject_path), "pyproject.toml should exist"
         with open(pyproject_path, "r") as f:
@@ -198,12 +194,8 @@ class TestTemplateStructure:
         assert os.path.exists(dockerfile_path), "Dockerfile should exist"
         with open(dockerfile_path, "r") as f:
             dockerfile_content = f.read()
-            assert "FROM python" in dockerfile_content, (
-                "Dockerfile should use Python base image"
-            )
-            assert "uv sync" in dockerfile_content, (
-                "Dockerfile should use uv sync"
-            )
+            assert "FROM python" in dockerfile_content, "Dockerfile should use Python base image"
+            assert "uv sync" in dockerfile_content, "Dockerfile should use uv sync"
             assert "RUN pip install" not in dockerfile_content, (
                 "uv migration complete - should not use pip install"
             )
@@ -212,15 +204,9 @@ class TestTemplateStructure:
         assert os.path.exists(compose_path), "docker-compose.yml should exist"
         with open(compose_path, "r") as f:
             compose_content = f.read()
-            assert "version:" in compose_content, (
-                "docker-compose.yml should have version"
-            )
-            assert "services:" in compose_content, (
-                "docker-compose.yml should have services"
-            )
-            assert "web:" in compose_content, (
-                "docker-compose.yml should have web service"
-            )
+            assert "version:" in compose_content, "docker-compose.yml should have version"
+            assert "services:" in compose_content, "docker-compose.yml should have services"
+            assert "web:" in compose_content, "docker-compose.yml should have web service"
 
         print("✓ Docker files have valid content")
 
@@ -303,9 +289,7 @@ class TestTemplateStructure:
                 "OAuth2APITestCase",
             ]
 
-            missing_classes = [
-                cls for cls in required_test_classes if cls not in content
-            ]
+            missing_classes = [cls for cls in required_test_classes if cls not in content]
             assert not missing_classes, f"Missing test classes: {missing_classes}"
 
             # Check for test methods

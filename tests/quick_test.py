@@ -97,9 +97,7 @@ def main():
     python_files = []
     template_files = 0
 
-    for root, dirs, files in os.walk(
-        os.path.join(template_dir, "{{ cookiecutter.project_slug }}")
-    ):
+    for root, dirs, files in os.walk(os.path.join(template_dir, "{{ cookiecutter.project_slug }}")):
         for file in files:
             if file.endswith(".py"):
                 python_files.append(file)
@@ -109,9 +107,7 @@ def main():
                     if "{{ cookiecutter." in content:
                         template_files += 1
 
-    print(
-        f"   ✓ Found {len(python_files)} Python files ({template_files} with template variables)"
-    )
+    print(f"   ✓ Found {len(python_files)} Python files ({template_files} with template variables)")
 
     # Summary
     print("\n" + "=" * 60)
