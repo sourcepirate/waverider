@@ -1,0 +1,75 @@
+[project]
+name = "{{ cookiecutter.project_slug }}"
+version = "0.1.0"
+description = "{{ cookiecutter.project_description }}"
+requires-python = ">=3.12"
+dependencies = [
+    "django>=5.2,<6.0",
+    "django-ninja>=1.6,<2.0",
+    "psycopg[binary]>=3.2,<4.0",
+    "python-decouple>=3.8,<4.0",
+    "dj-database-url>=3.1,<4.0",
+    "gunicorn>=25.3,<26.0",
+    "django-guardian>=3.3,<4.0",
+    "djangorestframework-simplejwt>=5.5,<6.0",
+    "django-redis>=6.0,<7.0",
+    "whitenoise[brotli]>=6.12,<7.0",
+{% if cookiecutter.use_celery == 'y' %}
+    "celery>=5.6,<6.0",
+    "redis>=7.4,<8.0",
+    "django-celery-beat>=2.9,<3.0",
+    "django-celery-results>=2.6,<3.0",
+{% endif %}
+{% if cookiecutter.include_oauth2 == 'y' %}
+    "django-oauth-toolkit>=3.2,<4.0",
+    "requests-oauthlib>=2.0,<3.0",
+    "social-auth-app-django>=5.7,<6.0",
+{% endif %}
+{% if cookiecutter.include_sentry == 'y' %}
+    "sentry-sdk[django]>=2.58,<3.0",
+{% endif %}
+]
+
+[project.optional-dependencies]
+dev = [
+    "django-extensions>=4.1,<5.0",
+    "django-debug-toolbar>=6.3,<7.0",
+    "Werkzeug>=3.1,<4.0",
+    "pytest>=9.0,<10.0",
+    "pytest-django>=4.12,<5.0",
+    "pytest-cov>=7.1,<8.0",
+    "ruff>=0.9,<1.0",
+    "pre-commit>=4.0,<5.0",
+    "coverage>=7.0,<8.0",
+]
+prod = [
+    "whitenoise[brotli]>=6.12,<7.0",
+{% if cookiecutter.include_sentry == 'y' %}
+    "sentry-sdk[django]>=2.58,<3.0",
+{% endif %}
+]
+
+[tool.uv]
+package = true
+
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "SIM"]
+
+[tool.ruff.format]
+quote-style = "single"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "{{ cookiecutter.project_slug }}.settings.local"
+python_files = ["tests.py", "test_*.py"]
+
+[tool.coverage.run]
+source = ["{{ cookiecutter.project_slug }}"]
+omit = ["*/tests/*", "*/migrations/*", "manage.py"]
+
+[tool.coverage.report]
+exclude_lines = ["pragma: no cover", "def __repr__", "raise AssertionError"]

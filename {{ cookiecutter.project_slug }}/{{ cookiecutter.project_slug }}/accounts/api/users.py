@@ -15,6 +15,7 @@ from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from django.contrib.auth import get_user_model
 
 from {{ cookiecutter.project_slug }}.accounts.schemas import UserSchema, ErrorSchema
+from {{ cookiecutter.project_slug }}.accounts.api.schemas import UserUpdateSchema
 
 # Initialize the users router
 router = Router()
@@ -56,7 +57,7 @@ def get_current_user(request):
     summary="Update current user profile",
     auth=jwt_auth
 )
-def update_current_user(request, payload: dict):
+def update_current_user(request, payload: UserUpdateSchema):
     """
     Update the current authenticated user's profile.
     Requires a valid JWT token.
@@ -73,7 +74,7 @@ def update_current_user(request, payload: dict):
         user.last_name = payload['last_name']
     if 'email' in payload:
         # Check if email is already taken by another user
-        if User.objects.filter(email=payload['email']).exclude(id=user.id).exists():
+        if User.objects.filter(email__iexact=payload['email']).exclude(id=user.id).exists():
             return 400, {"detail": "Email address is already in use."}
         user.email = payload['email']
     

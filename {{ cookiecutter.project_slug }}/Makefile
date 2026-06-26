@@ -1,4 +1,4 @@
-.PHONY: install test lint format validate generate
+.PHONY: install test lint format migrate shell
 
 install:
 	uv sync
@@ -14,8 +14,8 @@ format:
 	uv run ruff check --fix .
 	uv run ruff format .
 
-validate:
-	python validate_template.py
+migrate:
+	python manage.py migrate
 
-generate:
-	cookiecutter . --no-input
+shell:
+	python manage.py shell_plus

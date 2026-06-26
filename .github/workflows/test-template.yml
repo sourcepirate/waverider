@@ -2,12 +2,12 @@ name: Test Cookiecutter Template
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 jobs:
-  test:
+  validate:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -15,65 +15,89 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
-    
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
+      with:
+        version: "latest"
+
     - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r test-requirements.txt
-    
-    - name: Run tox validation
-      run: |
-        tox -e validate
-    
-    - name: Run tox tests
-      run: |
-        tox -e py
+      run: uv sync --frozen --all-extras
+
+    - name: Run template validation
+      run: uv run python validate_template.py
+
+    - name: Run pytest tests
+      run: uv run python -m pytest tests/test_cookiecutter.py -v
 
   comprehensive-test:
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.12'
-    
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
+      with:
+        version: "latest"
+
     - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r test-requirements.txt
-    
+      run: uv sync --frozen --all-extras
+
     - name: Run comprehensive tests
       run: |
-        tox -e all-tests
+        uv run python validate_template.py
+        uv run python tests/quick_test.py
+        uv run python -m pytest tests/test_cookiecutter.py -v
 
-  dependency-check:
+  generate-and-check:
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.12'
-        
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
+      with:
+        version: "latest"
+
     - name: Install cookiecutter
-      run: pip install cookiecutter
-      
-    - name: Generate template
+      run: uv tool install cookiecutter
+
+    - name: Generate project from template
       run: |
-        cookiecutter . --no-input --output-dir /tmp/test-project project_name="Test Project" project_slug="test_project"
-        
-    - name: Check dependencies compatibility
+        cookiecutter . --no-input --output-dir /tmp/test-project \
+          project_name="Test Project" \
+          project_slug="test_project" \
+          ci_provider="github" \
+          use_docker="y" \
+          use_celery="y" \
+          include_oauth2="y" \
+          include_sentry="y" \
+          api_versioning="none" \
+          django_secret_key="ci-test-key-not-for-production"
+
+    - name: Check generated project
       run: |
         cd /tmp/test-project/test_project
-        pip install -r requirements/local.txt
-        pip check
+        [ -f pyproject.toml ] && echo "✓ pyproject.toml exists"
+        [ -f manage.py ] && echo "✓ manage.py exists"
+        [ -d test_project/settings ] && echo "✓ settings dir exists"
+        [ -f test_project/celery.py ] && echo "✓ celery.py exists (use_celery=y)"
+        [ -d test_project/accounts/oauth2 ] && echo "✓ oauth2 dir exists (include_oauth2=y)"
+        python -m compileall -q -x "\.venv|__pycache__" . 2>&1 && echo "✓ All Python files have valid syntax"

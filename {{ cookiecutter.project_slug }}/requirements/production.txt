@@ -1,13 +1,3 @@
 # Requirements for production environment
-# Includes base requirements plus production-specific tools
-
--r base.txt
-
-# Simplified static file serving for production
-whitenoise[brotli]>=6.12.0,<7.0 # Includes brotli compression support
-
-# Production monitoring and logging
-sentry-sdk[django]>=2.58.0,<3.0 # Error tracking and performance monitoring
-
-# Add any other production-specific dependencies here
-# e.g., monitoring agents, specific logging libraries 
+#
+# DEPRECATED: Use `uv sync --no-dev` with pyproject.toml instead.

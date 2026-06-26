@@ -1,38 +1,6 @@
 # Base requirements for {{ cookiecutter.project_name }}
-
-# Django framework
-django>=6.0.0,<7.0 # Use Django 6.x
-
-# API Framework
-django-ninja>=1.6.2,<2.0
-
-# Celery and related packages
-celery>=5.6.3,<6.0
-redis>=7.4.0,<8.0 # Python client for Redis (used by Celery)
-django-celery-beat>=2.9.0,<3.0 # Database-backed periodic task scheduler
-django-celery-results>=2.6.0,<3.0 # Celery result backend using Django ORM
-
-# Database driver (PostgreSQL)
-psycopg[binary]>=3.2.0,<4.0 # Use psycopg 3 binary for easier installation and modern Django support
-
-# Cache backend (Redis)
-django-redis>=6.0.0,<7.0
-
-# JWT Authentication
-djangorestframework-simplejwt>=5.5.1,<6.0
-
-# OAuth2 Authentication
-django-oauth-toolkit>=3.2.0,<4.0 # OAuth2 provider and consumer
-requests-oauthlib>=2.0.0,<3.0 # OAuth2 client library
-social-auth-app-django>=5.7.0,<6.0 # Social authentication (Google, GitHub, etc.)
-
-# Object-level Permissions
-django-guardian>=3.3.1,<4.0
-
-# Environment variable management
-python-decouple>=3.8,<4.0
-# Optional: For parsing DATABASE_URL format easily
-dj-database-url>=3.1.2,<4.0
-
-# WSGI server for production
-gunicorn>=25.3.0,<26.0
+#
+# DEPRECATED: Use `uv sync` with pyproject.toml instead.
+# These files are kept for pip compatibility only.
+#
+# See pyproject.toml for the authoritative dependency list.
