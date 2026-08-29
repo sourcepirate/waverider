@@ -182,4 +182,38 @@ Deploying this project involves several steps beyond the scope of this README. K
 *   **Media Files:** Configure `MEDIA_ROOT` and `MEDIA_URL`. Production usually requires a persistent shared storage solution (like AWS S3, Google Cloud Storage) rather than the local filesystem.
 *   **Celery:** Run Celery workers and Celery Beat as persistent background services (e.g., using `systemd` or `supervisor`).
 *   **Database/Redis:** Use managed database and Redis services or properly secured and backed-up instances.
-*   **Security:** Review Django's deployment checklist: [https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/](https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/) 
+*   **Security:** Review Django's deployment checklist: [https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/](https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/)
+
+## Coding Agents
+
+This project includes optional coding agent configurations via the `coding_agents` cookiecutter variable.
+
+**Available agents:** `claude` (Claude Code), `gemini` (Gemini CLI), `opencode` (OpenCode), `pi` (Pi), `copilot` (GitHub Copilot), or `all`/`none`.
+
+**Examples:**
+
+```bash
+# Generate with all agents (default)
+cookiecutter gh:sourcepirate/waverider --no-input coding_agents=all
+
+# Only Claude and OpenCode
+cookiecutter gh:sourcepirate/waverider --no-input coding_agents="claude,opencode"
+
+# No agent files
+cookiecutter gh:sourcepirate/waverider --no-input coding_agents=none
+```
+
+**Generated files:**
+
+| Agent | Files |
+|-------|-------|
+| Shared | `AGENTS.md` (canonical, read by all) |
+| Claude | `CLAUDE.md` → `@AGENTS.md` bridge, `.claude/settings.local.json` |
+| Gemini | `GEMINI.md` → `@AGENTS.md` bridge, `.gemini/settings.json` (`contextFileName: AGENTS.md`) |
+| OpenCode | `opencode.json` (`instructions: ["AGENTS.md"]`) + `AGENTS.md` |
+| Pi | `AGENTS.md` (native) + `.pi/settings.json` |
+| Copilot | `.github/copilot-instructions.md` → references `AGENTS.md` |
+
+- `AGENTS.md` is the single source of truth; `CLAUDE.md`/`GEMINI.md` are thin bridges (`@AGENTS.md`).
+- Update `AGENTS.md` for project-wide conventions; agents auto-load it on startup.
+- For existing projects, manually copy `AGENTS.md` and the desired bridges from the template.

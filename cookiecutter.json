@@ -12,11 +12,69 @@
     "oauth2_providers": ["google", "github", "facebook", "microsoft", "gitlab", "slack", "discord", "apple"],
     "include_sentry": ["y", "n"],
     "api_versioning": ["none", "v1"],
+    "coding_agents": "all",
     "django_secret_key": "!!! DONT FORGET TO REPLACE THIS !!!_!! DO NOT USE IN PRODUCTION !!",
     "postgresql_user": "postgres",
     "postgresql_password": "password",
     "postgresql_db": "{{ cookiecutter.project_slug }}",
     "postgresql_port": "5432",
     "celery_broker_url": "redis://redis:6379/0",
-    "celery_result_backend": "redis://redis:6379/1"
+    "celery_result_backend": "redis://redis:6379/1",
+    "__prompts__": {
+        "project_name": "Project name",
+        "project_slug": "Project slug (auto-generated from project name)",
+        "project_description": "Short description of the project",
+        "author_name": "Author name",
+        "author_email": "Author email",
+        "github_username": "GitHub username or organization",
+        "ci_provider": {
+            "__prompt__": "CI provider",
+            "github": "GitHub Actions",
+            "gitlab": "GitLab CI"
+        },
+        "use_docker": {
+            "__prompt__": "Use Docker?",
+            "y": "Yes",
+            "n": "No"
+        },
+        "use_celery": {
+            "__prompt__": "Use Celery?",
+            "y": "Yes",
+            "n": "No"
+        },
+        "include_oauth2": {
+            "__prompt__": "Include OAuth2 support?",
+            "y": "Yes",
+            "n": "No"
+        },
+        "oauth2_providers": {
+            "__prompt__": "Default OAuth2 provider (can be extended later)",
+            "google": "Google",
+            "github": "GitHub",
+            "facebook": "Facebook",
+            "microsoft": "Microsoft",
+            "gitlab": "GitLab",
+            "slack": "Slack",
+            "discord": "Discord",
+            "apple": "Apple"
+        },
+        "include_sentry": {
+            "__prompt__": "Include Sentry?",
+            "y": "Yes",
+            "n": "No"
+        },
+        "api_versioning": {
+            "__prompt__": "API versioning strategy",
+            "none": "None (mount at /api/)",
+            "v1": "v1 (mount at /api/v1/)"
+        },
+        "coding_agents": "Coding agents to configure (comma-separated: claude,gemini,opencode,pi,copilot or 'all' or 'none')",
+        "django_secret_key": "Django secret key (auto-generated post-gen)",
+        "postgresql_user": "PostgreSQL user",
+        "postgresql_password": "PostgreSQL password",
+        "postgresql_db": "PostgreSQL database (auto from slug)",
+        "postgresql_port": "PostgreSQL port",
+        "celery_broker_url": "Celery broker URL",
+        "celery_result_backend": "Celery result backend"
+    }
 }

@@ -95,6 +95,58 @@ def remove_docker_compose_services(services_to_remove, compose_file):
         return False
 
 
+def parse_coding_agents(raw):
+    """Parse coding_agents value into a set of normalized agent names.
+
+    Supports:
+    - string "all" -> all agents
+    - string "none" / "" -> empty set
+    - comma-separated string "claude,gemini,opencode,pi,copilot"
+    - list representation "['claude', 'opencode']" (when passed via extra_context)
+    - actual list (if templating preserves type, handled via tojson)
+    """
+    if raw is None:
+        return set()
+    # Direct list/tuple handling (when using tojson)
+    if isinstance(raw, (list, tuple)):
+        valid = {"claude", "gemini", "opencode", "pi", "copilot", "codex", "cursor", "aider"}
+        parts = [str(x).strip().lower() for x in raw if str(x).strip()]
+        if not parts or (len(parts) == 1 and parts[0] == "none"):
+            return set()
+        if "all" in parts:
+            return {"claude", "gemini", "opencode", "pi", "copilot"}
+        return {p for p in parts if p in valid}
+    raw_str = str(raw).strip()
+    if not raw_str or raw_str.lower() == "none":
+        return set()
+    if raw_str.lower() == "all":
+        return {"claude", "gemini", "opencode", "pi", "copilot"}
+    # Handle list-like string representation: "['claude', 'gemini']" or '["claude","gemini"]'
+    if raw_str.startswith("[") and raw_str.endswith("]"):
+        try:
+            import ast
+            parsed = ast.literal_eval(raw_str)
+            if isinstance(parsed, (list, tuple)):
+                return {str(x).strip().lower() for x in parsed if str(x).strip().lower() != "none"}
+        except Exception:
+            pass
+        # fallback: strip brackets and split
+        raw_str = raw_str.strip("[]")
+    # Normal comma-separated
+    parts = [p.strip().lower().strip("'\"") for p in raw_str.split(",")]
+    # Also handle space-separated
+    expanded = []
+    for p in parts:
+        expanded.extend([x.strip() for x in p.split() if x.strip()])
+    # Filter valid agents
+    valid = {"claude", "gemini", "opencode", "pi", "copilot", "codex", "cursor", "aider"}
+    result = {p for p in expanded if p in valid}
+    # If user typed "all" among comma list, expand to all
+    if "all" in expanded:
+        return {"claude", "gemini", "opencode", "pi", "copilot"}
+    return result
+
+
 def main():
     print("\nPost-generation script starting...")
     print(f"Working directory: {PROJECT_DIRECTORY}")
@@ -104,6 +156,7 @@ def main():
     ci_provider = "{{ cookiecutter.ci_provider }}"
     use_celery = "{{ cookiecutter.use_celery }}"
     include_oauth2 = "{{ cookiecutter.include_oauth2 }}"
+    coding_agents_raw = {{ cookiecutter.coding_agents | tojson }}
 
     # 1. Generate SECRET_KEY
     new_secret_key = generate_secret_key()
@@ -139,6 +192,38 @@ def main():
         remove_file(".env.oauth2.example")
         remove_file(f"{project_slug}/accounts/oauth2")
         remove_file(f"{project_slug}/accounts/api/oauth2.py")
+
+    # 4b. Configure coding agents
+    print("\nConfiguring coding agents...")
+    coding_agents = parse_coding_agents(coding_agents_raw)
+    print(f"Selected coding agents: {sorted(coding_agents) if coding_agents else 'none'} (raw: {coding_agents_raw!r})")
+
+    # Mapping of agent -> files/dirs to keep
+    agent_files = {
+        "claude": ["CLAUDE.md", ".claude"],
+        "gemini": ["GEMINI.md", ".gemini"],
+        "opencode": ["opencode.json"],
+        "pi": [".pi"],
+        "copilot": [".github/copilot-instructions.md"],
+    }
+    # AGENTS.md is canonical for all agents (opencode, pi, copilot, codex, etc.)
+    # Keep it if any agent selected, else remove
+    if not coding_agents:
+        print("No coding agents selected -> removing all agent files")
+        remove_file("AGENTS.md")
+        for files in agent_files.values():
+            for f in files:
+                remove_file(f)
+    else:
+        # Remove files for unselected agents
+        for agent, files in agent_files.items():
+            if agent not in coding_agents:
+                for f in files:
+                    remove_file(f)
+        # AGENTS.md is shared - keep if any agent selected, already handled
+        print(f"Kept coding agent files for: {sorted(coding_agents)}")
+        # Ensure .github directory remains if copilot instructions removed but workflows exist
+        # (remove_file handles missing gracefully)
 
     # 5. Initialize Git repository
     if not run_command("git init", "Initialize Git repository"):

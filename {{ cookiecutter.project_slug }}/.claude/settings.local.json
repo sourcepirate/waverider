@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Edit",
+      "Bash(uv run *)",
+      "Bash(uv sync)",
+      "Bash(git *)",
+      "Bash(docker *)",
+      "Bash(pytest *)",
+      "Bash(ruff *)"
+    ],
+    "deny": []
+  }
+}
