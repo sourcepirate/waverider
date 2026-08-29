@@ -19,6 +19,7 @@ A Cookiecutter template for creating Django projects with Celery, Celery Beat, D
 *   **Basic Settings Structure**: Separate settings for `local` and `production`.
 *   **Gunicorn**: Production WSGI server.
 *   **Whitenoise**: Simplified static file serving for production (optional).
+*   **Coding Agents**: Optional configs for Claude Code, Gemini CLI, OpenCode, Pi, and Copilot via `coding_agents` (shared `AGENTS.md`).
 
 ## Prerequisites
 
@@ -41,6 +42,23 @@ cookiecutter /path/to/cookiecutter-django-celery-ninja
 ```
 
 You will be prompted for configuration values (like project name, author, database settings, etc.). See `cookiecutter.json` for details.
+
+### Coding Agents
+
+The template can generate configuration for multiple AI coding agents:
+
+```bash
+# All agents (default)
+cookiecutter gh:your-github-username/cookiecutter-django-celery-ninja --no-input coding_agents=all
+
+# Select specific agents (comma-separated)
+cookiecutter gh:your-github-username/cookiecutter-django-celery-ninja --no-input coding_agents="claude,gemini,opencode"
+
+# No agent configs
+cookiecutter gh:your-github-username/cookiecutter-django-celery-ninja --no-input coding_agents=none
+```
+
+**Supported:** `claude` (→ `CLAUDE.md` + `.claude/`), `gemini` (→ `GEMINI.md` + `.gemini/settings.json`), `opencode` (→ `opencode.json` + `AGENTS.md`), `pi` (→ `AGENTS.md` + `.pi/settings.json`), `copilot` (→ `.github/copilot-instructions.md`). `AGENTS.md` is the canonical single source of truth; `CLAUDE.md`/`GEMINI.md` are thin `@AGENTS.md` bridges.
 
 ## Testing the Template
 
