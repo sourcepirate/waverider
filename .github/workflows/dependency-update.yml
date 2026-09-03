@@ -22,7 +22,7 @@ jobs:
         env:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
         with:
-          model: opencode/deepseek-v4-flash-free
+          model: opencode-go/muse-spark-1.2-contributor
           prompt: |
             This is a cookiecutter template project. Dependencies are defined in TWO pyproject.toml files:
 
