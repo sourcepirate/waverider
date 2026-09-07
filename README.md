@@ -19,6 +19,7 @@ A Cookiecutter template for creating Django projects with Celery, Celery Beat, D
 *   **Basic Settings Structure**: Separate settings for `local` and `production`.
 *   **Gunicorn**: Production WSGI server.
 *   **Whitenoise**: Simplified static file serving for production (optional).
+*   **Observability**: Optional integrations for Sentry, Datadog, New Relic, and OpenTelemetry via `observability` (comma-separated, e.g. `sentry,datadog` or `all`).
 *   **Coding Agents**: Optional configs for Claude Code, Gemini CLI, OpenCode, Pi, and Copilot via `coding_agents` (shared `AGENTS.md`).
 
 ## Prerequisites
@@ -59,6 +60,38 @@ cookiecutter gh:your-github-username/cookiecutter-django-celery-ninja --no-input
 ```
 
 **Supported:** `claude` (→ `CLAUDE.md` + `.claude/`), `gemini` (→ `GEMINI.md` + `.gemini/settings.json`), `opencode` (→ `opencode.json` + `AGENTS.md`), `pi` (→ `AGENTS.md` + `.pi/settings.json`), `copilot` (→ `.github/copilot-instructions.md`). `AGENTS.md` is the canonical single source of truth; `CLAUDE.md`/`GEMINI.md` are thin `@AGENTS.md` bridges.
+
+### Observability
+
+The template supports multiple observability providers: Sentry, Datadog, New Relic, and OpenTelemetry.
+
+```bash
+# No observability (default)
+cookiecutter gh:your-github-username/cookiecutter-django-celery-ninja --no-input observability=none
+
+# Single provider
+cookiecutter gh:your-github-username/cookiecutter-django-celery-ninja --no-input observability=sentry
+cookiecutter gh:your-github-username/cookiecutter-django-celery-ninja --no-input observability=datadog
+cookiecutter gh:your-github-username/cookiecutter-django-celery-ninja --no-input observability=newrelic
+cookiecutter gh:your-github-username/cookiecutter-django-celery-ninja --no-input observability=opentelemetry
+
+# Multiple providers (comma-separated)
+cookiecutter gh:your-github-username/cookiecutter-django-celery-ninja --no-input observability="sentry,datadog"
+
+# All providers
+cookiecutter gh:your-github-username/cookiecutter-django-celery-ninja --no-input observability=all
+```
+
+**Provider details:**
+
+| Provider | SDK | Env vars | Notes |
+|----------|-----|----------|-------|
+| Sentry | `sentry-sdk[django]` | `SENTRY_DSN`, `SENTRY_TRACES_SAMPLE_RATE` | Init in `settings/production.py` + `settings/local.py` (when enabled). Legacy `include_sentry=y` still works. |
+| Datadog | `ddtrace` | `DD_API_KEY`, `DD_SERVICE`, `DD_TRACE_ENABLED` | `ddtrace.patch_all()` in `wsgi.py`/`asgi.py`. |
+| New Relic | `newrelic` | `NEW_RELIC_LICENSE_KEY`, `NEW_RELIC_APP_NAME` | `newrelic.ini` + `newrelic.agent.initialize()`. |
+| OpenTelemetry | `opentelemetry-*` | `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_SERVICE_NAME` | Instruments Django/Psycopg/Celery/Redis; `otel-collector` service in `docker-compose.yml`. |
+
+Generated observability code lives in `{{project_slug}}/observability/` (post-gen hook removes unselected providers) and is guarded by `try/except ImportError`.
 
 ## Testing the Template
 

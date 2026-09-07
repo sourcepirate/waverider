@@ -11,6 +11,7 @@
     "include_oauth2": ["y", "n"],
     "oauth2_providers": ["google", "github", "facebook", "microsoft", "gitlab", "slack", "discord", "apple"],
     "include_sentry": ["y", "n"],
+    "observability": "none",
     "api_versioning": ["none", "v1"],
     "coding_agents": "all",
     "django_secret_key": "!!! DONT FORGET TO REPLACE THIS !!!_!! DO NOT USE IN PRODUCTION !!",
@@ -59,10 +60,11 @@
             "apple": "Apple"
         },
         "include_sentry": {
-            "__prompt__": "Include Sentry?",
+            "__prompt__": "Include Sentry? (deprecated, use observability)",
             "y": "Yes",
             "n": "No"
         },
+        "observability": "Observability provider (comma-separated: none, sentry, datadog, newrelic, opentelemetry or 'all')",
         "api_versioning": {
             "__prompt__": "API versioning strategy",
             "none": "None (mount at /api/)",

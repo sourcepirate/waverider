@@ -25,8 +25,23 @@ dependencies = [
     "requests-oauthlib>=2.0,<3.0",
     "social-auth-app-django>=6.0,<7.0",
 {% endif %}
-{% if cookiecutter.include_sentry == 'y' %}
+{% if cookiecutter.include_sentry == 'y' or 'sentry' in cookiecutter.observability or 'all' in cookiecutter.observability %}
     "sentry-sdk[django]>=2.58,<3.0",
+{% endif %}
+{% if 'datadog' in cookiecutter.observability or 'all' in cookiecutter.observability %}
+    "ddtrace>=2.7,<4.0",
+{% endif %}
+{% if 'newrelic' in cookiecutter.observability or 'all' in cookiecutter.observability %}
+    "newrelic>=9,<11",
+{% endif %}
+{% if 'opentelemetry' in cookiecutter.observability or 'all' in cookiecutter.observability %}
+    "opentelemetry-api>=1.30,<2.0",
+    "opentelemetry-sdk>=1.30,<2.0",
+    "opentelemetry-exporter-otlp>=1.30,<2.0",
+    "opentelemetry-instrumentation-django>=0.51b0,<1.0",
+    "opentelemetry-instrumentation-psycopg>=0.51b0,<1.0",
+    "opentelemetry-instrumentation-celery>=0.51b0,<1.0",
+    "opentelemetry-instrumentation-redis>=0.51b0,<1.0",
 {% endif %}
 ]
 
@@ -44,8 +59,23 @@ dev = [
 ]
 prod = [
     "whitenoise[brotli]>=6.12,<7.0",
-{% if cookiecutter.include_sentry == 'y' %}
+{% if cookiecutter.include_sentry == 'y' or 'sentry' in cookiecutter.observability or 'all' in cookiecutter.observability %}
     "sentry-sdk[django]>=2.58,<3.0",
+{% endif %}
+{% if 'datadog' in cookiecutter.observability or 'all' in cookiecutter.observability %}
+    "ddtrace>=2.7,<4.0",
+{% endif %}
+{% if 'newrelic' in cookiecutter.observability or 'all' in cookiecutter.observability %}
+    "newrelic>=9,<11",
+{% endif %}
+{% if 'opentelemetry' in cookiecutter.observability or 'all' in cookiecutter.observability %}
+    "opentelemetry-api>=1.30,<2.0",
+    "opentelemetry-sdk>=1.30,<2.0",
+    "opentelemetry-exporter-otlp>=1.30,<2.0",
+    "opentelemetry-instrumentation-django>=0.51b0,<1.0",
+    "opentelemetry-instrumentation-psycopg>=0.51b0,<1.0",
+    "opentelemetry-instrumentation-celery>=0.51b0,<1.0",
+    "opentelemetry-instrumentation-redis>=0.51b0,<1.0",
 {% endif %}
 ]
 

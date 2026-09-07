@@ -59,17 +59,105 @@ CACHES = {
 }
 
 
+# Observability
 # Sentry
-{% if cookiecutter.include_sentry == 'y' %}
-import sentry_sdk
-from sentry_sdk.integrations.django import DjangoIntegration
+{% if cookiecutter.include_sentry == 'y' or 'sentry' in cookiecutter.observability or 'all' in cookiecutter.observability %}
+try:
+    import sentry_sdk
+    from sentry_sdk.integrations.celery import CeleryIntegration
+    from sentry_sdk.integrations.django import DjangoIntegration
+    from sentry_sdk.integrations.redis import RedisIntegration
 
-sentry_sdk.init(
-    dsn=config('SENTRY_DSN', default=''),
-    integrations=[DjangoIntegration()],
-    traces_sample_rate=config('SENTRY_TRACES_SAMPLE_RATE', default=1.0, cast=float),
-    send_default_pii=True,
-)
+    _sentry_dsn = config('SENTRY_DSN', default='')
+    if _sentry_dsn:
+        sentry_sdk.init(
+            dsn=_sentry_dsn,
+            integrations=[
+                DjangoIntegration(),
+                CeleryIntegration(monitor_beat_tasks=True),
+                RedisIntegration(),
+            ],
+            traces_sample_rate=config('SENTRY_TRACES_SAMPLE_RATE', default=1.0, cast=float),
+            profiles_sample_rate=config('SENTRY_PROFILES_SAMPLE_RATE', default=0.0, cast=float),
+            environment=config('SENTRY_ENVIRONMENT', default='production'),
+            release=config('SENTRY_RELEASE', default=''),
+            send_default_pii=True,
+        )
+except ImportError:
+    pass
+{% endif %}
+
+# Datadog APM - initialized via wsgi/asgi or here for non-WSGI contexts
+{% if 'datadog' in cookiecutter.observability or 'all' in cookiecutter.observability %}
+try:
+    import ddtrace  # noqa: F401
+
+    from ddtrace import config as dd_config
+    from ddtrace import patch_all
+
+    if config('DD_TRACE_ENABLED', default=False, cast=bool) or config('DD_API_KEY', default=''):
+        dd_config.service = config('DD_SERVICE', default='{{ cookiecutter.project_slug }}')
+        dd_config.env = config('DD_ENV', default='production')
+        dd_config.version = config('DD_VERSION', default='')
+        patch_all()
+except ImportError:
+    pass
+{% endif %}
+
+# New Relic - initialized via wsgi/asgi newrelic.agent.initialize(); keep helper here
+{% if 'newrelic' in cookiecutter.observability or 'all' in cookiecutter.observability %}
+try:
+    import newrelic.agent  # noqa: F401
+
+    _nr_license = config('NEW_RELIC_LICENSE_KEY', default='')
+    _nr_app_name = config('NEW_RELIC_APP_NAME', default='{{ cookiecutter.project_slug }}')
+    _nr_config = config('NEW_RELIC_CONFIG_FILE', default='newrelic.ini')
+    if _nr_license:
+        import os
+
+        if os.path.exists(_nr_config):
+            newrelic.agent.initialize(_nr_config, config('NEW_RELIC_ENVIRONMENT', default='production'))
+except ImportError:
+    pass
+{% endif %}
+
+# OpenTelemetry
+{% if 'opentelemetry' in cookiecutter.observability or 'all' in cookiecutter.observability %}
+try:
+    from opentelemetry import trace
+    from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+    from opentelemetry.instrumentation.celery import CeleryInstrumentor
+    from opentelemetry.instrumentation.django import DjangoInstrumentor
+    from opentelemetry.instrumentation.psycopg import PsycopgInstrumentor
+    from opentelemetry.instrumentation.redis import RedisInstrumentor
+    from opentelemetry.sdk.resources import Resource
+    from opentelemetry.sdk.trace import TracerProvider
+    from opentelemetry.sdk.trace.export import BatchSpanProcessor
+
+    _otel_endpoint = config('OTEL_EXPORTER_OTLP_ENDPOINT', default='')
+    _otel_enabled = config('OTEL_ENABLED', default=False, cast=bool)
+    if _otel_endpoint or _otel_enabled:
+        _otel_service = config('OTEL_SERVICE_NAME', default='{{ cookiecutter.project_slug }}')
+        _resource = Resource.create({'service.name': _otel_service})
+        _provider = TracerProvider(resource=_resource)
+        _exporter = OTLPSpanExporter(endpoint=_otel_endpoint or 'http://localhost:4318/v1/traces')
+        _provider.add_span_processor(BatchSpanProcessor(_exporter))
+        trace.set_tracer_provider(_provider)
+        DjangoInstrumentor().instrument()
+        try:
+            PsycopgInstrumentor().instrument()
+        except Exception:
+            pass
+        try:
+            CeleryInstrumentor().instrument()
+        except Exception:
+            pass
+        try:
+            RedisInstrumentor().instrument()
+        except Exception:
+            pass
+except ImportError:
+    pass
 {% endif %}
 
 

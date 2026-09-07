@@ -82,3 +82,57 @@ try:
     INTERNAL_IPS = ["127.0.0.1"]
 except ImportError:
     pass
+
+# Observability (optional in local - enable via env)
+# Sentry
+{% if cookiecutter.include_sentry == 'y' or 'sentry' in cookiecutter.observability or 'all' in cookiecutter.observability %}
+try:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+
+    _sentry_dsn = config('SENTRY_DSN', default='')
+    if _sentry_dsn and config('SENTRY_ENABLED', default=False, cast=bool):
+        sentry_sdk.init(
+            dsn=_sentry_dsn,
+            integrations=[DjangoIntegration()],
+            traces_sample_rate=config('SENTRY_TRACES_SAMPLE_RATE', default=1.0, cast=float),
+            send_default_pii=True,
+        )
+except ImportError:
+    pass
+{% endif %}
+{% if 'datadog' in cookiecutter.observability or 'all' in cookiecutter.observability %}
+try:
+    import ddtrace  # noqa: F401
+    from ddtrace import config as dd_config
+    from ddtrace import patch_all
+
+    if config('DD_TRACE_ENABLED', default=False, cast=bool):
+        dd_config.service = config('DD_SERVICE', default='{{ cookiecutter.project_slug }}')
+        dd_config.env = config('DD_ENV', default='development')
+        patch_all()
+except ImportError:
+    pass
+{% endif %}
+{% if 'opentelemetry' in cookiecutter.observability or 'all' in cookiecutter.observability %}
+try:
+    from opentelemetry import trace
+    from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+    from opentelemetry.instrumentation.django import DjangoInstrumentor
+    from opentelemetry.sdk.resources import Resource
+    from opentelemetry.sdk.trace import TracerProvider
+    from opentelemetry.sdk.trace.export import BatchSpanProcessor
+
+    if config('OTEL_ENABLED', default=False, cast=bool) or config('OTEL_EXPORTER_OTLP_ENDPOINT', default=''):
+        _otel_service = config('OTEL_SERVICE_NAME', default='{{ cookiecutter.project_slug }}')
+        _resource = Resource.create({'service.name': _otel_service})
+        _provider = TracerProvider(resource=_resource)
+        _exporter = OTLPSpanExporter(
+            endpoint=config('OTEL_EXPORTER_OTLP_ENDPOINT', default='http://localhost:4318/v1/traces')
+        )
+        _provider.add_span_processor(BatchSpanProcessor(_exporter))
+        trace.set_tracer_provider(_provider)
+        DjangoInstrumentor().instrument()
+except ImportError:
+    pass
+{% endif %}
