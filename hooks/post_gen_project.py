@@ -95,6 +95,73 @@ def remove_docker_compose_services(services_to_remove, compose_file):
         return False
 
 
+def parse_observability(raw, include_sentry_flag):
+    """Parse observability value into a set of normalized provider names.
+
+    Supports: none, sentry, datadog, newrelic, opentelemetry, all
+    Handles string, comma-separated, list, and tojson forms.
+    Also respects legacy include_sentry flag.
+    """
+    valid = {"sentry", "datadog", "newrelic", "opentelemetry"}
+    result = set()
+
+    # legacy include_sentry
+    if include_sentry_flag == "y":
+        result.add("sentry")
+
+    if raw is None:
+        return result
+
+    if isinstance(raw, (list, tuple)):
+        parts = [str(x).strip().lower() for x in raw if str(x).strip()]
+        if not parts:
+            return result
+        if "all" in parts:
+            return valid
+        if len(parts) == 1 and parts[0] == "none":
+            return result
+        for p in parts:
+            if p in valid:
+                result.add(p)
+            elif p == "none":
+                continue
+        return result
+
+    raw_str = str(raw).strip()
+    if not raw_str or raw_str.lower() == "none":
+        return result
+    if raw_str.lower() == "all":
+        return valid
+
+    if raw_str.startswith("[") and raw_str.endswith("]"):
+        try:
+            import ast
+
+            parsed = ast.literal_eval(raw_str)
+            if isinstance(parsed, (list, tuple)):
+                for x in parsed:
+                    v = str(x).strip().lower()
+                    if v in valid:
+                        result.add(v)
+                    elif v == "all":
+                        return valid
+                return result
+        except Exception:
+            pass
+        raw_str = raw_str.strip("[]")
+
+    parts = [p.strip().lower().strip("'\"") for p in raw_str.split(",")]
+    expanded = []
+    for p in parts:
+        expanded.extend([x.strip() for x in p.split() if x.strip()])
+    for p in expanded:
+        if p in valid:
+            result.add(p)
+        elif p == "all":
+            return valid
+    return result
+
+
 def parse_coding_agents(raw):
     """Parse coding_agents value into a set of normalized agent names.
 
@@ -156,6 +223,8 @@ def main():
     ci_provider = "{{ cookiecutter.ci_provider }}"
     use_celery = "{{ cookiecutter.use_celery }}"
     include_oauth2 = "{{ cookiecutter.include_oauth2 }}"
+    include_sentry = "{{ cookiecutter.include_sentry }}"
+    observability_raw = {{ cookiecutter.observability | tojson }}
     coding_agents_raw = {{ cookiecutter.coding_agents | tojson }}
 
     # 1. Generate SECRET_KEY
@@ -193,7 +262,43 @@ def main():
         remove_file(f"{project_slug}/accounts/oauth2")
         remove_file(f"{project_slug}/accounts/api/oauth2.py")
 
-    # 4b. Configure coding agents
+    # 4b. Configure observability
+    print("\nConfiguring observability...")
+    observability = parse_observability(observability_raw, include_sentry)
+    print(f"Selected observability: {sorted(observability) if observability else 'none'} (raw: {observability_raw!r}, include_sentry: {include_sentry})")
+
+    # Remove unselected observability files
+    observability_files = {
+        "sentry": [f"{project_slug}/observability/sentry.py"],
+        "datadog": [f"{project_slug}/observability/datadog.py"],
+        "newrelic": [f"{project_slug}/observability/newrelic.py", "newrelic.ini"],
+        "opentelemetry": [
+            f"{project_slug}/observability/otel.py",
+            "otel-collector-config.yaml",
+        ],
+    }
+    # If no provider selected, remove entire observability package if empty
+    if not observability:
+        print("No observability selected -> removing observability package")
+        remove_file(f"{project_slug}/observability")
+        remove_file("newrelic.ini")
+        remove_file("otel-collector-config.yaml")
+    else:
+        for provider, files in observability_files.items():
+            if provider not in observability:
+                for f in files:
+                    remove_file(f)
+        # If observability dir exists but only __init__.py remains, keep it
+        # Clean up empty observability dir check
+        obs_dir = os.path.join(PROJECT_DIRECTORY, f"{project_slug}/observability")
+        if os.path.isdir(obs_dir):
+            remaining = [x for x in os.listdir(obs_dir) if not x.startswith("__pycache__")]
+            if not remaining or remaining == ["__init__.py"]:
+                # Keep __init__.py even if single provider, it is lightweight
+                pass
+        print(f"Kept observability providers: {sorted(observability)}")
+
+    # 4c. Configure coding agents
     print("\nConfiguring coding agents...")
     coding_agents = parse_coding_agents(coding_agents_raw)
     print(f"Selected coding agents: {sorted(coding_agents) if coding_agents else 'none'} (raw: {coding_agents_raw!r})")

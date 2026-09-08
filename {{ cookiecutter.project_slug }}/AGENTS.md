@@ -11,23 +11,38 @@ This file is the single source of truth for AI coding agents. It is read by Open
 - **Auth**: JWT (SimpleJWT) + {% if cookiecutter.include_oauth2 == 'y' %}OAuth2 (django-oauth-toolkit, social-auth-app-django){% else %}JWT only (OAuth2 disabled){% endif %}
 - **API docs**: `/api/docs` (Ninja Swagger)
 
+## Observability
+
+- **Providers**: `none` (default), `sentry`, `datadog`, `newrelic`, `opentelemetry`, `all` – selected via `observability` cookiecutter var (comma-separated, supports `all`)
+- **Legacy**: `include_sentry=y` still enables Sentry for backward compat (use `observability=sentry` going forward)
+- **Sentry**: `sentry-sdk[django]` – `SENTRY_DSN`, `SENTRY_TRACES_SAMPLE_RATE`, `SENTRY_ENVIRONMENT`; init in `settings/production.py` (Celery+Redis integrations) and optionally `settings/local.py` when `SENTRY_ENABLED=true`
+- **Datadog**: `ddtrace` – `DD_API_KEY`, `DD_SERVICE`, `DD_ENV`, `DD_TRACE_ENABLED`; `ddtrace.patch_all()` in `wsgi.py`/`asgi.py` + `settings/production.py`
+- **New Relic**: `newrelic` – `NEW_RELIC_LICENSE_KEY`, `NEW_RELIC_APP_NAME`, `NEW_RELIC_CONFIG_FILE=newrelic.ini`; `newrelic.ini` at project root; `newrelic.agent.initialize()` in `wsgi.py`/`asgi.py` + `settings/production.py`
+- **OpenTelemetry**: `opentelemetry-*` – `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_SERVICE_NAME`, `OTEL_ENABLED`; instruments Django/Psycopg/Celery/Redis via `*Instrumentor().instrument()`; `docker-compose.yml` includes `otel-collector` + `otel-collector-config.yaml`
+- **Package**: `{{ cookiecutter.project_slug }}/observability/` – `sentry.py`, `datadog.py`, `newrelic.py`, `otel.py`, `__init__.py` (post-gen hook keeps only selected providers; `newrelic.ini` and `otel-collector-config.yaml` removed if not needed)
+- **Env**: `.env.example` and `docker-compose.yml` include provider-specific vars/services conditionally
+- **Graceful**: All inits wrapped in `try/except ImportError` so app runs even if SDK not installed
+
 ## Project Structure
 
 ```
 {{ cookiecutter.project_slug }}/
 ├── manage.py
 ├── pyproject.toml              # uv dependencies, ruff, pytest, coverage
-├── docker-compose.yml          # web, db (postgres), redis, celeryworker, celerybeat
+├── docker-compose.yml          # web, db (postgres), redis, celeryworker, celerybeat{% if 'opentelemetry' in cookiecutter.observability or 'all' in cookiecutter.observability %}, otel-collector{% endif %}
 ├── Dockerfile
 ├── .env.example / .env.oauth2.example
+├── newrelic.ini                # New Relic config (if newrelic)
+├── otel-collector-config.yaml  # OTel collector (if opentelemetry)
 ├── {{ cookiecutter.project_slug }}/
 │   ├── settings/
 │   │   ├── base.py             # shared config (DJANGO_APPS, THIRD_PARTY_APPS, LOCAL_APPS)
-│   │   ├── local.py            # DEBUG, DB via DATABASE_URL, CACHE_URL
-│   │   └── production.py       # production overrides
+│   │   ├── local.py            # DEBUG, DB via DATABASE_URL, CACHE_URL (+ optional observability)
+│   │   └── production.py       # production overrides + observability init
+│   ├── observability/          # provider modules (sentry, datadog, newrelic, otel)
 │   ├── urls.py                 # single NinjaAPI at /api/, mounts accounts_router
 │   ├── celery.py               # Celery app, namespace CELERY, autodiscover_tasks
-│   ├── wsgi.py / asgi.py
+│   ├── wsgi.py / asgi.py       # early patch for datadog/newrelic
 │   └── accounts/               # auth app
 │       ├── api/
 │       │   ├── __init__.py     # aggregates routers: auth, oauth2, users

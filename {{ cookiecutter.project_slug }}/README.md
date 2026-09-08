@@ -184,6 +184,54 @@ Deploying this project involves several steps beyond the scope of this README. K
 *   **Database/Redis:** Use managed database and Redis services or properly secured and backed-up instances.
 *   **Security:** Review Django's deployment checklist: [https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/](https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/)
 
+## Observability
+
+This template supports multiple observability providers via the `observability` cookiecutter variable.
+
+**Available providers:** `sentry`, `datadog`, `newrelic`, `opentelemetry`, or `none`/`all`. Multiple providers can be combined comma-separated.
+
+**Examples:**
+
+```bash
+# No observability (default)
+cookiecutter gh:sourcepirate/waverider --no-input observability=none
+
+# Sentry only (also via legacy include_sentry=y)
+cookiecutter gh:sourcepirate/waverider --no-input observability=sentry
+cookiecutter gh:sourcepirate/waverider --no-input include_sentry=y
+
+# Datadog
+cookiecutter gh:sourcepirate/waverider --no-input observability=datadog
+
+# OpenTelemetry with OTLP collector
+cookiecutter gh:sourcepirate/waverider --no-input observability=opentelemetry
+
+# Multiple providers
+cookiecutter gh:sourcepirate/waverider --no-input observability="sentry,datadog"
+
+# All providers
+cookiecutter gh:sourcepirate/waverider --no-input observability=all
+```
+
+**Provider details:**
+
+| Provider | SDK | Env vars | Notes |
+|----------|-----|----------|-------|
+| Sentry | `sentry-sdk[django]` | `SENTRY_DSN`, `SENTRY_TRACES_SAMPLE_RATE`, `SENTRY_ENVIRONMENT` | Initialized in `settings/production.py` (and `local.py` if `SENTRY_ENABLED=true`). Celery+Redis integrations enabled. |
+| Datadog | `ddtrace` | `DD_API_KEY`, `DD_SERVICE`, `DD_ENV`, `DD_TRACE_ENABLED` | Patched early in `wsgi.py`/`asgi.py` via `ddtrace.patch_all()` and in `settings/production.py`. |
+| New Relic | `newrelic` | `NEW_RELIC_LICENSE_KEY`, `NEW_RELIC_APP_NAME`, `NEW_RELIC_CONFIG_FILE` | Uses `newrelic.ini` (generated) and `newrelic.agent.initialize()` in `wsgi.py`/`asgi.py` + `settings/production.py`. |
+| OpenTelemetry | `opentelemetry-*` | `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_SERVICE_NAME`, `OTEL_ENABLED` | Instruments Django, Psycopg, Celery, Redis via `DjangoInstrumentor` etc. `docker-compose.yml` includes `otel-collector` service and `otel-collector-config.yaml`. |
+
+**Generated files:**
+
+- `{{ cookiecutter.project_slug }}/observability/` – package with `sentry.py`, `datadog.py`, `newrelic.py`, `otel.py`, `__init__.py` (only selected providers are kept; post-gen hook removes others)
+- `newrelic.ini` – New Relic agent config (only if `newrelic` selected)
+- `otel-collector-config.yaml` – OpenTelemetry Collector config (only if `opentelemetry` selected)
+- `.env.example` – provider-specific env vars
+- `docker-compose.yml` – provider env vars and `otel-collector` service
+
+All providers are optional and degrade gracefully if SDK not installed (`try/except ImportError`).
+
 ## Coding Agents
 
 This project includes optional coding agent configurations via the `coding_agents` cookiecutter variable.
